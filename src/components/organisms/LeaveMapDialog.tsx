@@ -58,7 +58,7 @@ const LeaveMapDialog = () => {
           dispatch(leaveMap(response.body));
           dispatch(openToast(I18n.t('unfollow map success')));
 
-          gtag('event', 'unfollow', {
+          (window as any).gtag('event', 'unfollow', {
             event_category: 'engagement',
             event_label: 'map'
           });

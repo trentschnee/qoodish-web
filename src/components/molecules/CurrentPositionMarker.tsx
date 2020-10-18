@@ -1,16 +1,10 @@
-import React, {
-  useContext,
-  useEffect,
-  useCallback,
-  useState,
-  memo
-} from 'react';
+import { useContext, useEffect, useCallback, useState, memo } from 'react';
 import GoogleMapsContext from '../../context/GoogleMapsContext';
 import { useMappedState } from 'redux-react-hook';
 import I18n from '../../utils/I18n';
 
 export default memo(function CurrentPositionMarker() {
-  const { googleMapsApi, gMap } = useContext(GoogleMapsContext);
+  const { googleMap } = useContext(GoogleMapsContext);
   const [currentPositionMarker, setCurrentPositionMarker] = useState(undefined);
 
   const mapState = useCallback(
@@ -22,13 +16,13 @@ export default memo(function CurrentPositionMarker() {
   const { currentPosition } = useMappedState(mapState);
 
   const createCurrentPositionMarker = useCallback(() => {
-    const marker = new googleMapsApi.Marker({
+    const marker = new google.maps.Marker({
       position: {
         lat: parseFloat(currentPosition.lat),
         lng: parseFloat(currentPosition.lng)
       },
       icon: {
-        path: googleMapsApi.SymbolPath.CIRCLE,
+        path: google.maps.SymbolPath.CIRCLE,
         scale: 8,
         fillColor: '#0088ff',
         fillOpacity: 0.8,
@@ -38,16 +32,16 @@ export default memo(function CurrentPositionMarker() {
       title: I18n.t('you are hear')
     });
 
-    marker.setMap(gMap);
+    marker.setMap(googleMap);
     setCurrentPositionMarker(marker);
-  }, [currentPosition, googleMapsApi, gMap]);
+  }, [currentPosition, googleMap]);
 
   const removeCurrentPositionMarker = useCallback(() => {
     currentPositionMarker.setMap(null);
   }, [currentPositionMarker]);
 
   useEffect(() => {
-    if (!googleMapsApi || !currentPosition.lat || !gMap) {
+    if (!currentPosition.lat || !googleMap) {
       return;
     }
     createCurrentPositionMarker();

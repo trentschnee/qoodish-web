@@ -1,19 +1,19 @@
 import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'redux-react-hook';
-
-import AddIcon from '@material-ui/icons/Add';
-import GridListTileBar from '@material-ui/core/GridListTileBar';
-
 import openPlaceSelectDialog from '../../actions/openPlaceSelectDialog';
 import selectPlaceForReview from '../../actions/selectPlaceForReview';
 import I18n from '../../utils/I18n';
+import { createStyles, GridListTileBar, makeStyles } from '@material-ui/core';
+import { Add } from '@material-ui/icons';
 
-const styles = {
-  createReviewTile: {
-    height: '100%',
-    textAlign: 'center'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    createReviewTile: {
+      height: '100%',
+      textAlign: 'center'
+    }
+  })
+);
 
 type Props = {
   currentSpot: any;
@@ -22,6 +22,7 @@ type Props = {
 export default memo(function CreateReviewTile(props: Props) {
   const dispatch = useDispatch();
   const { currentSpot } = props;
+  const classes = useStyles();
 
   const handleCreateReviewClick = useCallback(() => {
     if (currentSpot) {
@@ -39,8 +40,8 @@ export default memo(function CreateReviewTile(props: Props) {
   return (
     <div key="add-review" onClick={handleCreateReviewClick}>
       <GridListTileBar
-        style={styles.createReviewTile}
-        title={<AddIcon fontSize="large" />}
+        className={classes.createReviewTile}
+        title={<Add fontSize="large" />}
         subtitle={I18n.t('create new report')}
       />
     </div>

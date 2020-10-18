@@ -11,41 +11,45 @@ import SwipeableViews from 'react-swipeable-views';
 import ButtonBase from '@material-ui/core/ButtonBase';
 
 import openImageDialog from '../../actions/openImageDialog';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  cardMedia: {
-    position: 'relative'
-  },
-  stepper: {
-    background: 'rgba(0, 0, 0, 0)',
-    justifyContent: 'center',
-    padding: 16,
-    paddingBottom: 0
-  },
-  stepButtonLeft: {
-    position: 'absolute',
-    zIndex: 1,
-    top: '50%',
-    left: 12,
-    transform: 'translateY(-50%)'
-  },
-  stepButtonRight: {
-    position: 'absolute',
-    zIndex: 1,
-    top: '50%',
-    right: 12,
-    transform: 'translateY(-50%)'
-  },
-  reviewImage: {
-    width: '100%'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    cardMedia: {
+      position: 'relative'
+    },
+    stepper: {
+      background: 'rgba(0, 0, 0, 0)',
+      justifyContent: 'center',
+      padding: 16,
+      paddingBottom: 0
+    },
+    stepButtonLeft: {
+      position: 'absolute',
+      zIndex: 1,
+      top: '50%',
+      left: 12,
+      transform: 'translateY(-50%)'
+    },
+    stepButtonRight: {
+      position: 'absolute',
+      zIndex: 1,
+      top: '50%',
+      right: 12,
+      transform: 'translateY(-50%)'
+    },
+    reviewImage: {
+      width: '100%'
+    }
+  })
+);
 
 const ReviewImageStepper = props => {
   const { review } = props;
   const large = useMediaQuery('(min-width: 600px)');
   const [activeStep, setActiveStep] = useState(0);
   const maxSteps = review.images.length;
+  const classes = useStyles();
 
   const dispatch = useDispatch();
 
@@ -62,13 +66,13 @@ const ReviewImageStepper = props => {
 
   return (
     <div>
-      <CardMedia style={styles.cardMedia}>
+      <CardMedia className={classes.cardMedia}>
         {large && maxSteps > 1 && (
           <Fab
             size="small"
             onClick={() => setActiveStep(activeStep - 1)}
             disabled={activeStep === 0}
-            style={styles.stepButtonLeft}
+            className={classes.stepButtonLeft}
           >
             <KeyboardArrowLeft fontSize="large" />
           </Fab>
@@ -81,7 +85,7 @@ const ReviewImageStepper = props => {
             <ButtonBase onClick={() => handleImageClick(image)} key={image.id}>
               <img
                 src={image.thumbnail_url_800}
-                style={styles.reviewImage}
+                className={classes.reviewImage}
                 alt={review.spot.name}
                 loading="lazy"
               />
@@ -93,17 +97,19 @@ const ReviewImageStepper = props => {
             size="small"
             onClick={() => setActiveStep(activeStep + 1)}
             disabled={activeStep === maxSteps - 1}
-            style={styles.stepButtonRight}
+            className={classes.stepButtonRight}
           >
             <KeyboardArrowRight fontSize="large" />
           </Fab>
         )}
       </CardMedia>
       <MobileStepper
-        style={styles.stepper}
+        className={classes.stepper}
         steps={maxSteps}
         position="static"
         activeStep={activeStep}
+        backButton={null}
+        nextButton={null}
       />
     </div>
   );

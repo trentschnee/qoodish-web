@@ -13,6 +13,7 @@ import I18n from '../../utils/I18n';
 import { MapsApi, NewMap } from '@yusuke-suzuki/qoodish-api-js-client';
 
 import uploadToStorage from '../../utils/uploadToStorage';
+import { v1 as uuidv1 } from 'uuid';
 
 const EditMapDialog = () => {
   const dispatch = useDispatch();
@@ -35,13 +36,15 @@ const EditMapDialog = () => {
       dispatch(requestStart());
 
       if (params.image_url) {
-        const uploadResponse = await uploadToStorage(
+        const fileName = `maps/${uuidv1()}.jpg`;
+        const imageUrl = await uploadToStorage(
           params.image_url,
-          'maps',
+          fileName,
           'data_url'
         );
+
         Object.assign(params, {
-          image_url: uploadResponse.imageUrl
+          image_url: imageUrl
         });
       }
 

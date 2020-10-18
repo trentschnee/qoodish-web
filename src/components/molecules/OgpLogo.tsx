@@ -39,7 +39,7 @@ const OgpLogo = () => {
       <div>
         <div style={styles.logoContainer}>
           <MapIcon color="primary" style={styles.icon} />
-          <Typography variant="h1" color="default" style={styles.logo}>
+          <Typography variant="h1" style={styles.logo}>
             Qoodish
           </Typography>
         </div>

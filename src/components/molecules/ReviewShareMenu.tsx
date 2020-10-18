@@ -35,7 +35,7 @@ const styles = {
 
 const shareUrl = review => {
   return review
-    ? `${process.env.ENDPOINT}/maps/${review.map.id}/reports/${review.id}`
+    ? `${process.env.NEXT_PUBLIC_ENDPOINT}/maps/${review.map.id}/reports/${review.id}`
     : '';
 };
 

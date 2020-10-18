@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'redux-react-hook';
-import { useHistory } from '@yusuke-suzuki/rize-router';
 
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
 
@@ -20,10 +19,11 @@ import requestFinish from '../../actions/requestFinish';
 import { UsersApi, NewUser } from '@yusuke-suzuki/qoodish-api-js-client';
 import closeSignInRequiredDialog from '../../actions/closeSignInRequiredDialog';
 import fetchMyProfile from '../../actions/fetchMyProfile';
+import { useRouter } from 'next/router';
 
 const LoginButtons = props => {
   const dispatch = useDispatch();
-  const history = useHistory();
+  const router = useRouter();
 
   const { nextPath } = props;
   const [firebaseAuth, setFirebaseAuth] = useState(undefined);
@@ -43,7 +43,7 @@ const LoginButtons = props => {
         }
       },
       signInFlow: useIOS() ? 'redirect' : 'popup',
-      signInSuccessUrl: process.env.ENDPOINT,
+      signInSuccessUrl: process.env.NEXT_PUBLIC_ENDPOINT,
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         {
@@ -54,8 +54,8 @@ const LoginButtons = props => {
         firebase.auth.GithubAuthProvider.PROVIDER_ID,
         firebaseui.auth.AnonymousAuthProvider.PROVIDER_ID
       ],
-      tosUrl: `${process.env.ENDPOINT}/terms`,
-      privacyPolicyUrl: `${process.env.ENDPOINT}/privacy`
+      tosUrl: `${process.env.NEXT_PUBLIC_ENDPOINT}/terms`,
+      privacyPolicyUrl: `${process.env.NEXT_PUBLIC_ENDPOINT}/privacy`
     });
   }, []);
 
@@ -70,10 +70,10 @@ const LoginButtons = props => {
 
       if (currentUser.isAnonymous) {
         if (nextPath) {
-          history.push(nextPath);
+          router.push(nextPath);
         }
 
-        gtag('event', 'login', {
+        (window as any).gtag('event', 'login', {
           method: 'anonymous'
         });
         return;
@@ -106,11 +106,11 @@ const LoginButtons = props => {
 
         if (response.ok) {
           if (nextPath) {
-            history.push(nextPath);
+            router.push(nextPath);
           }
 
           dispatch(openToast(I18n.t('sign in success')));
-          gtag('event', 'login', {
+          (window as any).gtag('event', 'login', {
             method: authResult.additionalUserInfo.providerId
           });
 
@@ -122,7 +122,7 @@ const LoginButtons = props => {
         }
       });
     },
-    [dispatch, history, nextPath]
+    [dispatch, router, nextPath]
   );
 
   return uiConfig && firebaseAuth ? (

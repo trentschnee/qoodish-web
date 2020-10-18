@@ -1,7 +1,5 @@
 import React, { useCallback } from 'react';
 import { useMappedState, useDispatch } from 'redux-react-hook';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -12,11 +10,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Slide from '@material-ui/core/Slide';
 import Fade from '@material-ui/core/Fade';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 
 import I18n from '../../utils/I18n';
 import closeLikesDialog from '../../actions/closeLikesDialog';
 import DialogAppBar from '../molecules/DialogAppBar';
+import { useTheme, useMediaQuery } from '@material-ui/core';
 
 const styles = {
   dialogContent: {
@@ -29,7 +28,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 const LikesDialog = () => {
-  const large = useMediaQuery('(min-width: 600px)');
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
   const dispatch = useDispatch();
 
   const mapState = useCallback(
@@ -50,9 +50,9 @@ const LikesDialog = () => {
       open={dialogOpen}
       onClose={handleRequestDialogClose}
       fullWidth
-      TransitionComponent={large ? Fade : Transition}
+      TransitionComponent={smUp ? Fade : Transition}
     >
-      {large ? (
+      {smUp ? (
         <DialogTitle>{I18n.t('likes')}</DialogTitle>
       ) : (
         <DialogAppBar
@@ -64,21 +64,17 @@ const LikesDialog = () => {
       <DialogContent style={styles.dialogContent}>
         <List>
           {likes.map(like => (
-            <ListItem
-              button
-              key={like.id}
-              component={Link}
-              to={`/users/${like.voter.id}`}
-              title={like.voter.name}
-            >
-              <ListItemAvatar>
-                <Avatar
-                  src={like.voter.profile_image_url}
-                  alt={like.voter.name}
-                />
-              </ListItemAvatar>
-              <ListItemText primary={like.voter.name} />
-            </ListItem>
+            <Link key={like.id} href={`/users/${like.voter.id}`} passHref>
+              <ListItem button title={like.voter.name}>
+                <ListItemAvatar>
+                  <Avatar
+                    src={like.voter.profile_image_url}
+                    alt={like.voter.name}
+                  />
+                </ListItemAvatar>
+                <ListItemText primary={like.voter.name} />
+              </ListItem>
+            </Link>
           ))}
         </List>
       </DialogContent>

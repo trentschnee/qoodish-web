@@ -13,6 +13,7 @@ import readNotification from '../../actions/readNotification';
 
 import sleep from '../../utils/sleep';
 import {
+  ApiClient,
   NotificationsApi,
   InlineObject1
 } from '@yusuke-suzuki/qoodish-api-js-client';
@@ -76,13 +77,16 @@ const NotificationsMenu = props => {
 
   const refreshNotifications = useCallback(async () => {
     const apiInstance = new NotificationsApi();
+    const firebaseAuth = ApiClient.instance.authentications['firebaseAuth'];
+    firebaseAuth.apiKey = await currentUser.getIdToken();
+    firebaseAuth.apiKeyPrefix = 'Bearer';
 
     apiInstance.notificationsGet((error, data, response) => {
       if (response.ok) {
         dispatch(fetchNotifications(response.body));
       }
     });
-  }, [dispatch]);
+  }, [dispatch, currentUser]);
 
   useEffect(() => {
     if (!currentUser || !currentUser.uid || currentUser.isAnonymous) {

@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 
 import Typography from '@material-ui/core/Typography';
 import GridList from '@material-ui/core/GridList';
@@ -17,10 +17,12 @@ const styles = {
     borderRadius: 4
   },
   pickUpTileLarge: {
-    height: 330
+    height: 330,
+    width: '100%'
   },
   pickUpTileSmall: {
-    height: 280
+    height: 280,
+    width: '100%'
   },
   pickUpTileBar: {
     height: '100%'
@@ -45,7 +47,7 @@ const PickUpMap = () => {
     firebaseAuth.apiKeyPrefix = 'Bearer';
 
     apiInstance.mapsMapIdGet(
-      process.env.PICKED_UP_MAP_ID,
+      process.env.NEXT_PUBLIC_PICKED_UP_MAP_ID,
       (error, data, response) => {
         if (response.ok) {
           setMap(response.body);
@@ -63,41 +65,41 @@ const PickUpMap = () => {
 
   return (
     <GridList cols={1} style={styles.gridList} spacing={0}>
-      <GridListTile
-        key={map && map.id}
-        style={smUp ? styles.pickUpTileLarge : styles.pickUpTileSmall}
-        component={Link}
-        to={`/maps/${map && map.id}`}
-        title={map && map.name}
-      >
-        <img
-          src={map && map.thumbnail_url_800}
-          alt={map && map.name}
-          loading="lazy"
-        />
-        <GridListTileBar
-          title={
-            <Typography
-              variant={smUp ? 'h2' : 'h4'}
-              color="inherit"
-              gutterBottom
-              style={styles.pickUpText}
-            >
-              {map && map.name}
-            </Typography>
-          }
-          subtitle={
-            <Typography
-              variant={smUp ? 'h4' : 'h5'}
-              color="inherit"
-              style={styles.pickUpText}
-            >
-              <span>{map && `by: ${map.owner_name}`}</span>
-            </Typography>
-          }
-          style={styles.pickUpTileBar}
-        />
-      </GridListTile>
+      <Link href={`/maps/${map && map.id}`}>
+        <a title={map && map.name}>
+          <GridListTile
+            style={smUp ? styles.pickUpTileLarge : styles.pickUpTileSmall}
+          >
+            <img
+              src={map && map.thumbnail_url_800}
+              alt={map && map.name}
+              loading="lazy"
+            />
+            <GridListTileBar
+              title={
+                <Typography
+                  variant={smUp ? 'h2' : 'h4'}
+                  color="inherit"
+                  gutterBottom
+                  style={styles.pickUpText}
+                >
+                  {map && map.name}
+                </Typography>
+              }
+              subtitle={
+                <Typography
+                  variant={smUp ? 'h4' : 'h5'}
+                  color="inherit"
+                  style={styles.pickUpText}
+                >
+                  <span>{map && `by: ${map.owner_name}`}</span>
+                </Typography>
+              }
+              style={styles.pickUpTileBar}
+            />
+          </GridListTile>
+        </a>
+      </Link>
     </GridList>
   );
 };

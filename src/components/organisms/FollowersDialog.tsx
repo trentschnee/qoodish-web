@@ -12,7 +12,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Avatar from '@material-ui/core/Avatar';
 import Slide from '@material-ui/core/Slide';
 import Fade from '@material-ui/core/Fade';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 
 import I18n from '../../utils/I18n';
 import closeFollowersDialog from '../../actions/closeFollowersDialog';
@@ -64,18 +64,17 @@ const FollowersDialog = () => {
       <DialogContent style={styles.dialogContent}>
         <List>
           {followers.map(follower => (
-            <ListItem
-              button
-              key={follower.id}
-              component={Link}
-              to={`/users/${follower.id}`}
-              title={follower.name}
-            >
-              <ListItemAvatar>
-                <Avatar src={follower.profile_image_url} alt={follower.name} />
-              </ListItemAvatar>
-              <ListItemText primary={follower.name} />
-            </ListItem>
+            <Link key={follower.id} href={`/users/${follower.id}`} passHref>
+              <ListItem button title={follower.name}>
+                <ListItemAvatar>
+                  <Avatar
+                    src={follower.profile_image_url}
+                    alt={follower.name}
+                  />
+                </ListItemAvatar>
+                <ListItemText primary={follower.name} />
+              </ListItem>
+            </Link>
           ))}
         </List>
       </DialogContent>

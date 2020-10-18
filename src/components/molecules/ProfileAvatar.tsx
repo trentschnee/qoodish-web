@@ -5,7 +5,7 @@ import AuthContext from '../../context/AuthContext';
 
 type Props = {
   profile: any;
-  size: number;
+  size?: number;
 };
 
 export default function ProfileAvatar(props: Props) {
@@ -30,9 +30,11 @@ export default function ProfileAvatar(props: Props) {
     return (
       <Avatar
         src={profile.thumbnail_url_400}
+        imgProps={{
+          alt: profile.name,
+          loading: 'lazy'
+        }}
         style={avatarStyle}
-        alt={profile.name}
-        loading="lazy"
       />
     );
   }

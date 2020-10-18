@@ -1,96 +1,90 @@
-import React, { useCallback, useState, useEffect } from 'react';
-import { useMappedState, useDispatch } from 'redux-react-hook';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import IconButton from '@material-ui/core/IconButton';
-import Chip from '@material-ui/core/Chip';
-import Avatar from '@material-ui/core/Avatar';
-import PlaceIcon from '@material-ui/icons/Place';
-import AddAPhotoIcon from '@material-ui/icons/AddAPhoto';
-import Button from '@material-ui/core/Button';
-import Slide from '@material-ui/core/Slide';
-import Fade from '@material-ui/core/Fade';
-
-import * as loadImage from 'blueimp-load-image';
-
+import {
+  Avatar,
+  Button,
+  Chip,
+  createStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  makeStyles,
+  Slide,
+  SlideProps,
+  Theme,
+  useMediaQuery,
+  useTheme
+} from '@material-ui/core';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
+import fileToDataUrl from '../../utils/fileToDataUrl';
+import uploadToStorage from '../../utils/uploadToStorage';
+import { v4 as uuidv4 } from 'uuid';
+import { useDispatch, useMappedState } from 'redux-react-hook';
 import closeEditReviewDialog from '../../actions/closeEditReviewDialog';
-import openToast from '../../actions/openToast';
 import openPlaceSelectDialog from '../../actions/openPlaceSelectDialog';
-import fetchPostableMaps from '../../actions/fetchPostableMaps';
-import I18n from '../../utils/I18n';
-
 import { MapsApi } from '@yusuke-suzuki/qoodish-api-js-client';
-
+import { ReviewsApi, NewReview } from '@yusuke-suzuki/qoodish-api-js-client';
+import fetchPostableMaps from '../../actions/fetchPostableMaps';
+import openToast from '../../actions/openToast';
+import I18n from '../../utils/I18n';
 import DialogAppBar from '../molecules/DialogAppBar';
+import { Place } from '@material-ui/icons';
 import MapSelect from '../molecules/MapSelect';
+import PhotoTiles from '../molecules/PhotoTiles';
+import AddPhotoButton from '../molecules/AddPhotoButton';
+import requestStart from '../../actions/requestStart';
+import requestFinish from '../../actions/requestFinish';
+import sleep from '../../utils/sleep';
+import createReview from '../../actions/createReview';
+import requestMapCenter from '../../actions/requestMapCenter';
+import selectMapSpot from '../../actions/selectMapSpot';
+import editReview from '../../actions/editReview';
 import ReviewCommentForm from '../molecules/ReviewCommentForm';
-import SaveReviewButton from '../molecules/SaveReviewButton';
-import ReviewImagePreview from '../molecules/ReviewImagePreview';
-import GridList from '@material-ui/core/GridList';
-import GridListTile from '@material-ui/core/GridListTile';
 
-import { v1 as uuidv1 } from 'uuid';
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    addPhotoButton: {
+      marginRight: 'auto'
+    },
+    placeChipLabel: {
+      overflow: 'hidden',
+      maxWidth: 'calc(100vw - 100px)',
+      textOverflow: 'ellipsis'
+    },
+    photoTiles: {
+      marginTop: theme.spacing(2)
+    },
+    dialogContent: {
+      paddingTop: theme.spacing(3),
+      [theme.breakpoints.up('sm')]: {
+        paddingTop: 0
+      }
+    },
+    dialogActions: {
+      padding: theme.spacing(2)
+    }
+  })
+);
 
-const styles = {
-  dialogContentLarge: {},
-  dialogContentSmall: {
-    paddingTop: 24
-  },
-  imageInput: {
-    display: 'none'
-  },
-  placeChipLabel: {
-    overflow: 'hidden',
-    maxWidth: 'calc(100vw - 100px)',
-    textOverflow: 'ellipsis'
-  },
-  gridList: {
-    flexWrap: 'nowrap',
-    transform: 'translateZ(0)',
-    width: '100%'
-  }
+type Image = {
+  id?: number;
+  url: string;
+  thumbnail_url?: string;
+  thumbnail_url_400?: string;
+  thumbnail_url_800?: string;
 };
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = forwardRef(function Transition(props: SlideProps, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const AddImageButton = React.memo(props => {
-  const { images } = props;
-
-  const handleAddImageClick = useCallback(() => {
-    document.getElementById('review-image-input').click();
-  }, []);
-
-  return (
-    <IconButton onClick={handleAddImageClick} disabled={4 <= images.length}>
-      <AddAPhotoIcon />
-    </IconButton>
-  );
-});
-
-const EditReviewDialog = () => {
-  const large = useMediaQuery('(min-width: 600px)');
-
-  const [targetMapId, setTargetMapId] = useState(undefined);
-  const [comment, setComment] = useState('');
-  const [errorComment, setErrorComment] = useState(undefined);
-  const [disabled, setDisabled] = useState(true);
-  const [images, setImages] = useState([]);
-  const [currentFiles, setCurrentFiles] = useState([]);
-
-  useEffect(() => {
-    if (targetMapId && comment && !errorComment && images.length <= 4) {
-      setDisabled(false);
-    } else {
-      setDisabled(true);
-    }
-  }, [targetMapId, comment, errorComment, images]);
-
+export default memo(function EditReviewDialog() {
   const dispatch = useDispatch();
 
   const mapState = useCallback(
@@ -104,40 +98,18 @@ const EditReviewDialog = () => {
 
   const { dialogOpen, selectedPlace, currentReview } = useMappedState(mapState);
 
-  const handleMapChange = useCallback(currentMapId => {
-    setTargetMapId(currentMapId);
-  }, []);
+  const [comment, setComment] = useState<string>(null);
+  const [currentFiles, setCurrentFiles] = useState<File[]>([]);
+  const [currentImages, setCurrentImages] = useState<Image[]>([]);
+  const [targetMapId, setTargetMapId] = useState<number>(null);
 
-  const handleCommentChange = useCallback(
-    (currentComment, currentCommentError) => {
-      setErrorComment(currentCommentError);
-      setComment(currentComment);
-    },
-    []
-  );
+  const disabled = useMemo(() => {
+    return !(comment && targetMapId && selectedPlace);
+  }, [comment, targetMapId && selectedPlace]);
 
-  const setCurrentReview = useCallback(() => {
-    if (currentReview) {
-      setImages(
-        currentReview.images.map(image => {
-          const element = new Image();
-          element.src = image.thumbnail_url_400;
-          element.dataset.url = image.url;
-          element.id = uuidv1();
-          return element;
-        })
-      );
-      setDisabled(false);
-    }
-  }, [currentReview]);
-
-  const handleRequestClose = useCallback(() => {
-    dispatch(closeEditReviewDialog());
-  }, [dispatch]);
-
-  const handleSpotClick = useCallback(() => {
-    dispatch(openPlaceSelectDialog());
-  }, [dispatch]);
+  const classes = useStyles();
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   const initPostableMaps = useCallback(async () => {
     const apiInstance = new MapsApi();
@@ -151,103 +123,193 @@ const EditReviewDialog = () => {
       } else if (response.status == 401) {
         dispatch(openToast('Authenticate failed'));
       } else {
-        console.log(error);
+        console.error(error);
       }
     });
   }, [dispatch]);
 
-  const initForm = useCallback(() => {
-    setCurrentReview();
+  const handleEnter = useCallback(() => {
     initPostableMaps();
-  }, [setCurrentReview, initPostableMaps]);
+  }, [initPostableMaps]);
 
-  const handleImageFilesChange = useCallback(
-    e => {
-      const files = e.target.files;
-
-      for (let file of files) {
-        if (currentFiles.some(currentFile => currentFile.name === file.name)) {
-          continue;
-        }
-        currentFiles.push(file);
-      }
-
-      setCurrentFiles([...currentFiles]);
-    },
-    [currentFiles]
-  );
-
-  const fileToCanvas = useCallback(
-    async file => {
-      if (!file.type.match(/image\/*/)) {
-        return;
-      }
-
-      const image = new Image();
-
-      loadImage.parseMetaData(file, data => {
-        const options = {
-          canvas: true
-        };
-
-        if (data.exif) {
-          Object.assign(options, {
-            orientation: data.exif.get('Orientation')
-          });
-        }
-
-        loadImage(
-          file,
-          canvas => {
-            image.src = canvas.toDataURL('image/jpeg');
-            image.id = uuidv1();
-
-            images.push(image);
-            setImages([...images]);
-          },
-          options
-        );
-      });
-    },
-    [images]
-  );
-
-  useEffect(() => {
-    for (let file of currentFiles) {
-      fileToCanvas(file);
-    }
-  }, [currentFiles]);
-
-  const clearInputs = useCallback(() => {
-    setDisabled(true);
-    setImages([]);
+  const handleExited = useCallback(() => {
+    setComment(null);
     setCurrentFiles([]);
+    setCurrentImages([]);
+    setTargetMapId(null);
   }, []);
 
-  const handleImageRemoved = useCallback(
-    targetImage => {
-      setImages(
-        images.filter(image => {
-          return image.id !== targetImage.id;
+  const handleRequestClose = useCallback(() => {
+    dispatch(closeEditReviewDialog());
+  }, [dispatch]);
+
+  const handleSpotClick = useCallback(() => {
+    dispatch(openPlaceSelectDialog());
+  }, [dispatch]);
+
+  const handleImageFilesChange = useCallback(files => {
+    setCurrentFiles(files);
+  }, []);
+
+  const handleImageRemove = useCallback(
+    index => {
+      setCurrentImages(
+        currentImages.filter((image, i) => {
+          return i !== index;
         })
       );
     },
-    [images]
+    [currentImages]
   );
+
+  const handleCommentChange = useCallback(value => {
+    setComment(value);
+  }, []);
+
+  const handleMapChange = useCallback(currentMapId => {
+    setTargetMapId(currentMapId);
+  }, []);
+
+  const filesToImages = useCallback(async () => {
+    const items: Image[] = [];
+
+    for (let file of currentFiles) {
+      const dataUrl = await fileToDataUrl(file);
+      items.push({
+        url: dataUrl
+      });
+    }
+
+    setCurrentImages([...currentImages, ...items]);
+  }, [currentFiles, currentImages]);
+
+  const handleSaveClick = useCallback(async () => {
+    dispatch(requestStart());
+
+    const photos = [];
+
+    for (let image of currentImages) {
+      const url = new URL(image.url);
+
+      if (url.protocol === 'data:') {
+        const fileName = `images/${uuidv4()}.jpg`;
+        const imageUrl = await uploadToStorage(image.url, fileName, 'data_url');
+        photos.push({ url: imageUrl });
+      } else if (url.protocol === 'https:') {
+        // Do nothing
+        photos.push({ url: image.url });
+      }
+    }
+
+    const review = NewReview.constructFromObject({
+      comment: comment,
+      place_id: selectedPlace.placeId,
+      images: photos
+    });
+
+    if (currentReview) {
+      handleEditReview(review);
+    } else {
+      handleCreateReview(review);
+    }
+  }, [
+    dispatch,
+    comment,
+    currentImages,
+    uploadToStorage,
+    currentReview,
+    selectedPlace
+  ]);
+
+  const handleCreateReview = useCallback(
+    review => {
+      const apiInstance = new ReviewsApi();
+
+      apiInstance.mapsMapIdReviewsPost(
+        targetMapId,
+        review,
+        async (error, data, response) => {
+          dispatch(requestFinish());
+
+          if (response.ok) {
+            dispatch(closeEditReviewDialog());
+            dispatch(openToast(I18n.t('create review success')));
+
+            (window as any).gtag('event', 'create', {
+              event_category: 'engagement',
+              event_label: 'review'
+            });
+
+            // wait until thumbnail created on cloud function
+            await sleep(3000);
+
+            const newReview = response.body;
+            dispatch(createReview(newReview));
+            dispatch(requestMapCenter(newReview.spot.lat, newReview.spot.lng));
+            dispatch(selectMapSpot(newReview.spot));
+          } else {
+            dispatch(openToast(response.body.detail));
+          }
+        }
+      );
+    },
+    [targetMapId, dispatch]
+  );
+
+  const handleEditReview = useCallback(
+    review => {
+      const apiInstance = new ReviewsApi();
+
+      apiInstance.reviewsReviewIdPut(
+        currentReview.id,
+        review,
+        async (error, data, response) => {
+          dispatch(requestFinish());
+
+          if (response.ok) {
+            dispatch(closeEditReviewDialog());
+            dispatch(openToast(I18n.t('edit review success')));
+
+            // wait until thumbnail created on cloud function
+            await sleep(3000);
+
+            const newReview = response.body;
+            dispatch(editReview(newReview));
+            dispatch(requestMapCenter(newReview.spot.lat, newReview.spot.lng));
+          } else {
+            dispatch(openToast(response.body.detail));
+          }
+        }
+      );
+    },
+    [currentReview, dispatch]
+  );
+
+  useEffect(() => {
+    filesToImages();
+  }, [currentFiles]);
+
+  useEffect(() => {
+    if (currentReview) {
+      setTargetMapId(currentReview.map.id);
+      setComment(currentReview.comment);
+      setCurrentImages(currentReview.images);
+    }
+  }, [currentReview]);
 
   return (
     <Dialog
       open={dialogOpen}
-      onEnter={initForm}
+      onEnter={handleEnter}
       onClose={handleRequestClose}
-      onExited={clearInputs}
+      onExited={handleExited}
       disableBackdropClick
       disableEscapeKeyDown
       fullWidth
-      fullScreen={!large}
-      TransitionComponent={large ? Fade : Transition}
+      fullScreen={!smUp}
+      TransitionComponent={Transition}
     >
-      {large ? (
+      {smUp ? (
         <DialogTitle>
           {currentReview ? I18n.t('edit report') : I18n.t('create new report')}
         </DialogTitle>
@@ -257,31 +319,29 @@ const EditReviewDialog = () => {
             currentReview ? I18n.t('edit report') : I18n.t('create new report')
           }
           action={
-            <SaveReviewButton
+            <Button
+              variant="contained"
+              onClick={handleSaveClick}
               color="secondary"
               disabled={disabled}
-              selectedPlace={selectedPlace}
-              images={images}
-              comment={comment}
-              currentReview={currentReview}
-              targetMapId={targetMapId}
-            />
+              data-test="save-review-button"
+            >
+              {I18n.t('save')}
+            </Button>
           }
           handleRequestDialogClose={handleRequestClose}
         />
       )}
 
-      <DialogContent
-        style={large ? styles.dialogContentLarge : styles.dialogContentSmall}
-      >
+      <DialogContent className={classes.dialogContent}>
         <Chip
           avatar={
             <Avatar>
-              <PlaceIcon />
+              <Place />
             </Avatar>
           }
           label={
-            <div style={styles.placeChipLabel}>
+            <div className={classes.placeChipLabel}>
               {selectedPlace && selectedPlace.description}
             </div>
           }
@@ -296,58 +356,46 @@ const EditReviewDialog = () => {
 
         <ReviewCommentForm
           currentReview={currentReview}
-          onCommentChange={handleCommentChange}
+          onChange={handleCommentChange}
         />
 
-        <GridList
-          cols={2.5}
-          style={styles.gridList}
-          spacing={4}
-          cellHeight={150}
-        >
-          {images.map(image => (
-            <GridListTile key={image.id}>
-              <ReviewImagePreview
-                id={image.id}
-                image={image}
-                onImageRemoved={() => handleImageRemoved(image)}
-              />
-            </GridListTile>
-          ))}
-        </GridList>
-
-        {large && <AddImageButton images={images} />}
-
-        <input
-          type="file"
-          accept="image/*"
-          id="review-image-input"
-          onChange={handleImageFilesChange}
-          style={styles.imageInput}
-          multiple
-        />
+        <div className={classes.photoTiles}>
+          <PhotoTiles
+            photoURLs={currentImages.map(image => image.url)}
+            onRemove={handleImageRemove}
+            variant="preview"
+          />
+        </div>
       </DialogContent>
 
-      {large ? (
-        <DialogActions>
+      {smUp ? (
+        <DialogActions className={classes.dialogActions}>
+          <div className={classes.addPhotoButton}>
+            <AddPhotoButton
+              id="review-image-input"
+              onChange={handleImageFilesChange}
+            />
+          </div>
+
           <Button onClick={handleRequestClose}>{I18n.t('cancel')}</Button>
-          <SaveReviewButton
+          <Button
+            variant="contained"
+            onClick={handleSaveClick}
             color="primary"
             disabled={disabled}
-            selectedPlace={selectedPlace}
-            images={images}
-            comment={comment}
-            currentReview={currentReview}
-            targetMapId={targetMapId}
-          />
+            data-test="save-review-button"
+          >
+            {I18n.t('save')}
+          </Button>
         </DialogActions>
       ) : (
-        <DialogActions>
-          <AddImageButton images={images} />
+        <DialogActions className={classes.dialogActions}>
+          <AddPhotoButton
+            id="review-image-input"
+            onChange={handleImageFilesChange}
+          />
         </DialogActions>
       )}
     </Dialog>
   );
-};
-
-export default React.memo(EditReviewDialog);
+});

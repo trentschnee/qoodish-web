@@ -7,117 +7,119 @@ import CardActions from '@material-ui/core/CardActions';
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
 import moment from 'moment';
-import ButtonBase from '@material-ui/core/ButtonBase';
 import Divider from '@material-ui/core/Divider';
 import twitter from 'twitter-text';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import ReviewShareMenu from './ReviewShareMenu';
 import ReviewVertMenu from './ReviewVertMenu';
 import ReviewCardActions from './ReviewCardActions';
 import ReviewComments from './ReviewComments';
 import I18n from '../../utils/I18n';
 import ReviewImageStepper from './ReviewImageStepper';
+import SpotLink from './SpotLink';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  cardTitle: {
-    width: 'fit-content',
-    wordBreak: 'break-all'
-  },
-  reviewComment: {
-    wordBreak: 'break-all',
-    whiteSpace: 'pre-wrap'
-  },
-  cardContent: {
-    paddingTop: 0
-  },
-  action: {
-    display: 'flex'
-  },
-  cardActions: {
-    paddingLeft: 24,
-    paddingRight: 16
-  }
+const useStyles = makeStyles(() =>
+  createStyles({
+    cardTitle: {
+      width: 'fit-content',
+      wordBreak: 'break-all'
+    },
+    reviewComment: {
+      wordBreak: 'break-all',
+      whiteSpace: 'pre-wrap'
+    },
+    cardContent: {
+      paddingTop: 0
+    },
+    action: {
+      display: 'flex'
+    },
+    cardActions: {
+      paddingLeft: 24,
+      paddingRight: 16
+    },
+    link: {
+      textDecoration: 'none',
+      color: 'inherit'
+    }
+  })
+);
+
+type ReviewCardChildrenProps = {
+  currentReview: any;
 };
 
-const ReviewCardHeader = React.memo(props => {
+const ReviewCardHeader = React.memo((props: ReviewCardChildrenProps) => {
   const { currentReview } = props;
+  const classes = useStyles();
 
   return (
     <CardHeader
       avatar={
-        <ButtonBase
-          component={Link}
-          to={`/users/${currentReview.author.id}`}
-          title={currentReview.author.name}
-        >
-          <Avatar
-            src={currentReview.author.profile_image_url}
-            alt={currentReview.author.name}
-            loading="lazy"
-          />
-        </ButtonBase>
+        <Link href={`/users/${currentReview.author.id}`}>
+          <a title={currentReview.author.name}>
+            <Avatar
+              src={currentReview.author.profile_image_url}
+              imgProps={{
+                alt: currentReview.author.name,
+                loading: 'lazy'
+              }}
+            />
+          </a>
+        </Link>
       }
       action={
-        <div style={styles.action}>
+        <div className={classes.action}>
           <ReviewShareMenu currentReview={currentReview} />
           <ReviewVertMenu currentReview={currentReview} />
         </div>
       }
       title={
-        <ButtonBase
-          component={Link}
-          to={`/users/${currentReview.author.id}`}
-          title={currentReview.author.name}
-        >
-          {currentReview.author.name}
-        </ButtonBase>
+        <Link href={`/users/${currentReview.author.id}`}>
+          <a title={currentReview.author.name} className={classes.link}>
+            {currentReview.author.name}
+          </a>
+        </Link>
       }
       subheader={createdAt(currentReview)}
     />
   );
 });
 
-const ReviewCardContent = React.memo(props => {
+const ReviewCardContent = React.memo((props: ReviewCardChildrenProps) => {
   const { currentReview } = props;
+  const classes = useStyles();
 
   return (
-    <CardContent style={styles.cardContent}>
-      <ButtonBase
-        component={Link}
-        to={`/maps/${currentReview.map.id}`}
-        title={currentReview.map.name}
-      >
-        <Typography
-          variant="subtitle1"
-          color="primary"
-          style={styles.cardTitle}
-          gutterBottom
-        >
-          {currentReview.map.name}
-        </Typography>
-      </ButtonBase>
-      <br />
-      <ButtonBase
-        component={Link}
-        to={{
-          pathname: `/spots/${currentReview.spot.place_id}`,
-          state: { modal: true, spot: currentReview.spot }
-        }}
-        title={currentReview.spot.name}
-      >
+    <CardContent className={classes.cardContent}>
+      <Link href={`/maps/${currentReview.map.id}`}>
+        <a title={currentReview.map.name} className={classes.link}>
+          <Typography
+            variant="subtitle1"
+            color="primary"
+            className={classes.cardTitle}
+            gutterBottom
+          >
+            {currentReview.map.name}
+          </Typography>
+        </a>
+      </Link>
+
+      <SpotLink spot={currentReview.spot}>
         <Typography
           variant="h5"
           component="h2"
-          style={styles.cardTitle}
+          className={classes.cardTitle}
           gutterBottom
         >
           {currentReview.spot.name}
         </Typography>
-      </ButtonBase>
+      </SpotLink>
       <Typography
         component="p"
         dangerouslySetInnerHTML={commentHtml(currentReview)}
-        style={styles.reviewComment}
+        className={classes.reviewComment}
         data-test="review-card-comment"
       />
     </CardContent>
@@ -140,6 +142,7 @@ const commentHtml = review => {
 
 const ReviewCard = props => {
   const { currentReview } = props;
+  const classes = useStyles();
 
   return (
     <Card elevation={0}>
@@ -154,7 +157,7 @@ const ReviewCard = props => {
         <ReviewComments comments={currentReview.comments} />
       )}
       {props.hideActions ? null : (
-        <CardActions disableSpacing style={styles.cardActions}>
+        <CardActions disableSpacing className={classes.cardActions}>
           <ReviewCardActions review={currentReview} />
         </CardActions>
       )}

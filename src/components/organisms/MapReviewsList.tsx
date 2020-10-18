@@ -10,8 +10,8 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import Avatar from '@material-ui/core/Avatar';
 import moment from 'moment';
 import I18n from '../../utils/I18n';
-import { Link } from '@yusuke-suzuki/rize-router';
 import { useTheme, useMediaQuery } from '@material-ui/core';
+import ReviewLink from '../molecules/ReviewLink';
 
 const styles = {
   activityText: {
@@ -51,48 +51,39 @@ const MapReviewsList = () => {
       }
     >
       {mapReviews.map(review => (
-        <ListItem
-          button
-          key={review.id}
-          component={Link}
-          to={{
-            pathname: `/maps/${review.map.id}/reports/${review.id}`,
-            state: { modal: true, review: review }
-          }}
-        >
-          <ListItemAvatar>
-            <Avatar
-              src={review.author.profile_image_url}
-              alt={review.author.name}
-              loading="lazy"
-            />
-          </ListItemAvatar>
-          <ListItemText
-            primary={
-              <div style={styles.activityText}>
-                <b>{review.author.name}</b> {I18n.t('created a report about')}
-                <b>{review.spot.name}</b>
-              </div>
-            }
-            secondary={fromNow(review)}
-          />
-          {review.images.length > 0 && (
-            <ListItemSecondaryAction>
+        <ReviewLink review={review} key={review.id}>
+          <ListItem button>
+            <ListItemAvatar>
               <Avatar
-                src={review.images[0].thumbnail_url}
-                variant="rounded"
-                style={styles.secondaryAvatar}
-                alt={review.spot.name}
-                component={Link}
-                to={{
-                  pathname: `/maps/${review.map.id}/reports/${review.id}`,
-                  state: { modal: true, review: review }
-                }}
+                src={review.author.profile_image_url}
+                alt={review.author.name}
                 loading="lazy"
               />
-            </ListItemSecondaryAction>
-          )}
-        </ListItem>
+            </ListItemAvatar>
+            <ListItemText
+              primary={
+                <div style={styles.activityText}>
+                  <b>{review.author.name}</b> {I18n.t('created a report about')}
+                  <b>{review.spot.name}</b>
+                </div>
+              }
+              secondary={fromNow(review)}
+            />
+            {review.images.length > 0 && (
+              <ListItemSecondaryAction>
+                <ReviewLink review={review}>
+                  <Avatar
+                    src={review.images[0].thumbnail_url}
+                    variant="rounded"
+                    style={styles.secondaryAvatar}
+                    alt={review.spot.name}
+                    loading="lazy"
+                  />
+                </ReviewLink>
+              </ListItemSecondaryAction>
+            )}
+          </ListItem>
+        </ReviewLink>
       ))}
     </List>
   );

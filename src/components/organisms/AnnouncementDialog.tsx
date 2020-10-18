@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, memo } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 
 import Dialog from '@material-ui/core/Dialog';
@@ -18,28 +18,32 @@ import getFirestore from '../../utils/getFirestore';
 import closeAnnouncementDialog from '../../actions/closeAnnouncementDialog';
 import moment from 'moment';
 import updateAnnouncementIsNew from '../../actions/updateAnnoucementIsNew';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  listItemText: {
-    paddingRight: 0
-  },
-  title: {
-    wordBreak: 'break-all'
-  },
-  titleLink: {
-    textDecoration: 'none'
-  },
-  body: {
-    wordBreak: 'break-all'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    listItemText: {
+      paddingRight: 0
+    },
+    title: {
+      wordBreak: 'break-all'
+    },
+    titleLink: {
+      textDecoration: 'none'
+    },
+    body: {
+      wordBreak: 'break-all'
+    }
+  })
+);
 
 const issuedAt = date => {
   return moment(date).locale(I18n.locale).format('LL');
 };
 
-const AnnouncementDialog = () => {
+export default memo(function AnnouncementDialog() {
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   const mapState = useCallback(
     state => ({
@@ -107,7 +111,7 @@ const AnnouncementDialog = () => {
             <React.Fragment key={announcement.id}>
               <ListItem>
                 <ListItemText
-                  style={styles.listItemText}
+                  className={classes.listItemText}
                   primary={
                     <React.Fragment>
                       <Typography variant="subtitle2" color="textSecondary">
@@ -116,7 +120,7 @@ const AnnouncementDialog = () => {
                       <a
                         href={announcement.link}
                         target="_blank"
-                        style={styles.titleLink}
+                        className={classes.titleLink}
                       >
                         <Typography variant="h6" color="primary">
                           {announcement.title}
@@ -128,7 +132,7 @@ const AnnouncementDialog = () => {
                     <Typography
                       variant="subtitle1"
                       color="textSecondary"
-                      style={styles.body}
+                      className={classes.body}
                     >
                       {announcement.body}
                     </Typography>
@@ -146,6 +150,4 @@ const AnnouncementDialog = () => {
       </DialogActions>
     </Dialog>
   );
-};
-
-export default React.memo(AnnouncementDialog);
+});

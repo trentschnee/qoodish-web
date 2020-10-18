@@ -1,10 +1,8 @@
-import React, { memo, useCallback, useContext } from 'react';
+import { memo, useCallback, useContext } from 'react';
 import { useMappedState } from 'redux-react-hook';
 
-import IconButton from '@material-ui/core/IconButton';
-
 import ProfileAvatar from './ProfileAvatar';
-import { createStyles, makeStyles } from '@material-ui/core';
+import { createStyles, IconButton, makeStyles } from '@material-ui/core';
 import DrawerContext from '../../context/DrawerContext';
 
 const useStyles = makeStyles(() =>

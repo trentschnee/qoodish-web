@@ -1,7 +1,8 @@
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, { memo, useCallback, useContext } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { useHistory, Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer';
 import List from '@material-ui/core/List';
@@ -34,7 +35,6 @@ import ProfileCard from './ProfileCard';
 import deleteRegistrationToken from '../../utils/deleteRegistrationToken';
 import Logo from './Logo';
 import openAnnouncementDialog from '../../actions/openAnnouncementDialog';
-import { useIOS } from '../../utils/detectDevice';
 import AuthContext from '../../context/AuthContext';
 import { makeStyles, createStyles, useTheme } from '@material-ui/core';
 import DrawerContext from '../../context/DrawerContext';
@@ -65,19 +65,19 @@ const Title = memo(() => {
   const classes = useStyles();
 
   return (
-    <ListItem
-      divider
-      component={Link}
-      to="/"
-      className={smUp ? classes.titleLarge : classes.titleSmall}
-    >
-      <ListItemText disableTypography primary={<Logo />} />
-      <ListItemSecondaryAction>
-        <IconButton onClick={handleCloseDrawer}>
-          <ChevronLeftIcon />
-        </IconButton>
-      </ListItemSecondaryAction>
-    </ListItem>
+    <Link href="/" passHref>
+      <ListItem
+        divider
+        className={smUp ? classes.titleLarge : classes.titleSmall}
+      >
+        <ListItemText disableTypography primary={<Logo />} />
+        <ListItemSecondaryAction>
+          <IconButton onClick={handleCloseDrawer}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </ListItemSecondaryAction>
+      </ListItem>
+    </Link>
   );
 });
 
@@ -94,7 +94,7 @@ const DrawerContents = memo(() => {
   const { currentUser } = useContext(AuthContext);
 
   const dispatch = useDispatch();
-  const history = useHistory();
+  const router = useRouter();
 
   const handleSignOutClick = useCallback(async () => {
     dispatch(requestStart());
@@ -105,10 +105,10 @@ const DrawerContents = memo(() => {
     await getFirebaseAuth();
 
     await firebase.auth().signOut();
-    history.push('/login');
+    router.push('/login');
 
     dispatch(requestFinish());
-  }, [dispatch, history]);
+  }, [dispatch, router]);
 
   const handleAnnouncementClick = useCallback(() => {
     dispatch(openAnnouncementDialog());
@@ -120,7 +120,7 @@ const DrawerContents = memo(() => {
 
   const isSelected = useCallback(
     pathname => {
-      return currentLocation && currentLocation.pathname === pathname;
+      return currentLocation === pathname;
     },
     [currentLocation]
   );
@@ -130,114 +130,107 @@ const DrawerContents = memo(() => {
       <List disablePadding component="nav">
         <Title />
         <ProfileCard />
-        <ListItem button component={Link} to="/" title={I18n.t('home')}>
-          <ListItemIcon>
-            <HomeIcon color={isSelected('/') ? 'primary' : 'inherit'} />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('home')}
-            primaryTypographyProps={isSelected('/') ? { color: 'primary' } : {}}
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/discover"
-          title={I18n.t('discover')}
-        >
-          <ListItemIcon>
-            <ExploreIcon
-              color={isSelected('/discover') ? 'primary' : 'inherit'}
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('discover')}
-            primaryTypographyProps={
-              isSelected('/discover') ? { color: 'primary' } : {}
-            }
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/profile"
-          title={I18n.t('account')}
-        >
-          <ListItemIcon>
-            <AccountCircleIcon
-              color={isSelected('/profile') ? 'primary' : 'inherit'}
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('account')}
-            primaryTypographyProps={
-              isSelected('/profile') ? { color: 'primary' } : {}
-            }
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/notifications"
-          title={I18n.t('notifications')}
-        >
-          <ListItemIcon>
-            <NotificationsIcon
-              color={isSelected('/notifications') ? 'primary' : 'inherit'}
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('notifications')}
-            primaryTypographyProps={
-              isSelected('/notifications') ? { color: 'primary' } : {}
-            }
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/settings"
-          title={I18n.t('settings')}
-        >
-          <ListItemIcon>
-            <SettingsIcon
-              color={isSelected('/settings') ? 'primary' : 'inherit'}
-            />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('settings')}
-            primaryTypographyProps={
-              isSelected('/settings') ? { color: 'primary' } : {}
-            }
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/invites"
-          title={I18n.t('invites')}
-        >
-          <ListItemIcon>
-            <MailIcon color={isSelected('/invites') ? 'primary' : 'inherit'} />
-          </ListItemIcon>
-          <ListItemText
-            primary={I18n.t('invites')}
-            primaryTypographyProps={
-              isSelected('/invites') ? { color: 'primary' } : {}
-            }
-          />
-        </ListItem>
-        <Divider />
-        {currentUser.isAnonymous ? (
-          <ListItem button component={Link} to="/login" title={I18n.t('login')}>
+        <Link href="/" passHref>
+          <ListItem button title={I18n.t('home')}>
             <ListItemIcon>
-              <ExitToAppIcon />
+              <HomeIcon color={isSelected('/') ? 'primary' : 'inherit'} />
             </ListItemIcon>
             <ListItemText
-              primary={I18n.t('login')}
-              primaryTypographyProps={{ color: 'textSecondary' }}
+              primary={I18n.t('home')}
+              primaryTypographyProps={
+                isSelected('/') ? { color: 'primary' } : {}
+              }
             />
           </ListItem>
+        </Link>
+        <Link href="/discover" passHref>
+          <ListItem button title={I18n.t('discover')}>
+            <ListItemIcon>
+              <ExploreIcon
+                color={isSelected('/discover') ? 'primary' : 'inherit'}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary={I18n.t('discover')}
+              primaryTypographyProps={
+                isSelected('/discover') ? { color: 'primary' } : {}
+              }
+            />
+          </ListItem>
+        </Link>
+        <Link href="/profile" passHref>
+          <ListItem button title={I18n.t('account')}>
+            <ListItemIcon>
+              <AccountCircleIcon
+                color={isSelected('/profile') ? 'primary' : 'inherit'}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary={I18n.t('account')}
+              primaryTypographyProps={
+                isSelected('/profile') ? { color: 'primary' } : {}
+              }
+            />
+          </ListItem>
+        </Link>
+        <Link href="/notifications" passHref>
+          <ListItem button title={I18n.t('notifications')}>
+            <ListItemIcon>
+              <NotificationsIcon
+                color={isSelected('/notifications') ? 'primary' : 'inherit'}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary={I18n.t('notifications')}
+              primaryTypographyProps={
+                isSelected('/notifications') ? { color: 'primary' } : {}
+              }
+            />
+          </ListItem>
+        </Link>
+        <Link href="/settings" passHref>
+          <ListItem button title={I18n.t('settings')}>
+            <ListItemIcon>
+              <SettingsIcon
+                color={isSelected('/settings') ? 'primary' : 'inherit'}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary={I18n.t('settings')}
+              primaryTypographyProps={
+                isSelected('/settings') ? { color: 'primary' } : {}
+              }
+            />
+          </ListItem>
+        </Link>
+        <Link href="/invites" passHref>
+          <ListItem button title={I18n.t('invites')}>
+            <ListItemIcon>
+              <MailIcon
+                color={isSelected('/invites') ? 'primary' : 'inherit'}
+              />
+            </ListItemIcon>
+            <ListItemText
+              primary={I18n.t('invites')}
+              primaryTypographyProps={
+                isSelected('/invites') ? { color: 'primary' } : {}
+              }
+            />
+          </ListItem>
+        </Link>
+        <Divider />
+        {currentUser.isAnonymous ? (
+          <Link href="/login" passHref>
+            <ListItem button title={I18n.t('login')}>
+              <ListItemIcon>
+                <ExitToAppIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={I18n.t('login')}
+                primaryTypographyProps={{ color: 'textSecondary' }}
+              />
+            </ListItem>
+          </Link>
         ) : (
           <ListItem button onClick={handleSignOutClick}>
             <ListItemText
@@ -263,28 +256,22 @@ const DrawerContents = memo(() => {
             primaryTypographyProps={{ color: 'textSecondary' }}
           />
         </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/terms"
-          title={I18n.t('terms of service')}
-        >
-          <ListItemText
-            primary={I18n.t('terms of service')}
-            primaryTypographyProps={{ color: 'textSecondary' }}
-          />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/privacy"
-          title={I18n.t('privacy policy')}
-        >
-          <ListItemText
-            primary={I18n.t('privacy policy')}
-            primaryTypographyProps={{ color: 'textSecondary' }}
-          />
-        </ListItem>
+        <Link href="/terms" passHref>
+          <ListItem button title={I18n.t('terms of service')}>
+            <ListItemText
+              primary={I18n.t('terms of service')}
+              primaryTypographyProps={{ color: 'textSecondary' }}
+            />
+          </ListItem>
+        </Link>
+        <Link href="/privacy" passHref>
+          <ListItem button title={I18n.t('privacy policy')}>
+            <ListItemText
+              primary={I18n.t('privacy policy')}
+              primaryTypographyProps={{ color: 'textSecondary' }}
+            />
+          </ListItem>
+        </Link>
       </List>
     </div>
   );
@@ -301,10 +288,6 @@ export default memo(function NavDrawer() {
     setDrawerOpen(false);
   }, []);
 
-  const iOS = useMemo(() => {
-    return useIOS();
-  }, [useIOS]);
-
   const classes = useStyles();
 
   return (
@@ -314,8 +297,6 @@ export default memo(function NavDrawer() {
       onClose={handleCloseDrawer}
       onClick={handleCloseDrawer}
       PaperProps={{ className: classes.drawerPaper }}
-      disableBackdropTransition={!iOS}
-      disableDiscovery={iOS}
     >
       <DrawerContents />
     </SwipeableDrawer>

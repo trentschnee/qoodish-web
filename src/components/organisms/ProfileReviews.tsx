@@ -1,6 +1,11 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useState
+} from 'react';
 import { useMappedState, useDispatch } from 'redux-react-hook';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 
 import LoadMoreUserReviewsButton from '../molecules/LoadMoreUserReviewsButton';
 import ReviewGridList from './ReviewGridList';
@@ -8,11 +13,11 @@ import NoContents from '../molecules/NoContents';
 
 import fetchUserReviews from '../../actions/fetchUserReviews';
 import I18n from '../../utils/I18n';
-import { ReviewsApi } from '@yusuke-suzuki/qoodish-api-js-client';
+import { ApiClient, ReviewsApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import ReviewImageTile from './ReviewImageTile';
 import Skeleton from '@material-ui/lab/Skeleton';
 import AuthContext from '../../context/AuthContext';
-import { useTheme } from '@material-ui/core';
+import { useTheme, useMediaQuery } from '@material-ui/core';
 
 const styles = {
   reviewsLarge: {
@@ -57,11 +62,7 @@ const ProfileReviews = props => {
   const [loading, setLoading] = useState(true);
 
   const initReviews = useCallback(async () => {
-    if (
-      location &&
-      location.pathname === '/profile' &&
-      currentUser.isAnonymous
-    ) {
+    if (location === '/profile' && currentUser.isAnonymous) {
       setLoading(false);
       return;
     }
@@ -69,6 +70,9 @@ const ProfileReviews = props => {
 
     const userId = params && params.userId ? params.userId : currentUser.uid;
 
+    const firebaseAuth = ApiClient.instance.authentications['firebaseAuth'];
+    firebaseAuth.apiKey = await currentUser.getIdToken();
+    firebaseAuth.apiKeyPrefix = 'Bearer';
     const apiInstance = new ReviewsApi();
 
     apiInstance.usersUserIdReviewsGet(userId, {}, (error, data, response) => {
@@ -111,7 +115,7 @@ const ProfileReviews = props => {
           ))}
         </ReviewGridList>
       ) : (
-        <React.Fragment>
+        <Fragment>
           <ReviewGridList
             cols={smUp ? 4 : 3}
             spacing={smUp ? 20 : 4}
@@ -122,7 +126,7 @@ const ProfileReviews = props => {
             ))}
           </ReviewGridList>
           <LoadMoreUserReviewsButton {...props} />
-        </React.Fragment>
+        </Fragment>
       )}
     </div>
   );

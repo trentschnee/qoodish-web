@@ -8,7 +8,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import MenuItem from '@material-ui/core/MenuItem';
 import Avatar from '@material-ui/core/Avatar';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Typography from '@material-ui/core/Typography';
 
@@ -98,49 +98,50 @@ const NotificationList = props => {
   }, [currentUser]);
 
   return notifications.map(notification => (
-    <Item
-      key={notification.id}
-      onClick={props.handleNotificationClick}
-      button
-      component={Link}
-      to={notification.click_action}
-      item={props.item}
-      style={props.menu ? styles.notificationMenuItem : {}}
-      selected={!notification.read}
-    >
-      <ListItemAvatar>
-        <Avatar
-          src={notification.notifier.profile_image_url}
-          alt={notification.notifier.name}
-          loading="lazy"
+    <Link key={notification.id} href={notification.click_action} passHref>
+      <Item
+        onClick={props.handleNotificationClick}
+        button
+        item={props.item}
+        style={props.menu ? styles.notificationMenuItem : {}}
+        selected={!notification.read}
+      >
+        <ListItemAvatar>
+          <Avatar
+            src={notification.notifier.profile_image_url}
+            alt={notification.notifier.name}
+            loading="lazy"
+          />
+        </ListItemAvatar>
+        <ListItemText
+          style={styles.listItemText}
+          primary={
+            <Typography variant="subtitle1">
+              <NotificationText notification={notification} />
+            </Typography>
+          }
+          secondary={
+            <Typography variant="subtitle1" color="textSecondary">
+              {fromNow(notification)}
+            </Typography>
+          }
+          disableTypography
         />
-      </ListItemAvatar>
-      <ListItemText
-        style={styles.listItemText}
-        primary={
-          <Typography variant="subtitle1">
-            <NotificationText notification={notification} />
-          </Typography>
-        }
-        secondary={
-          <Typography variant="subtitle1" color="textSecondary">
-            {fromNow(notification)}
-          </Typography>
-        }
-        disableTypography
-      />
-      {notification.notifiable.thumbnail_url && (
-        <ListItemSecondaryAction onClick={props.handleNotificationClick}>
-          <ButtonBase component={Link} to={notification.click_action}>
-            <Avatar
-              src={notification.notifiable.thumbnail_url}
-              style={styles.secondaryAvatar}
-              loading="lazy"
-            />
-          </ButtonBase>
-        </ListItemSecondaryAction>
-      )}
-    </Item>
+        {notification.notifiable.thumbnail_url && (
+          <ListItemSecondaryAction onClick={props.handleNotificationClick}>
+            <Link href={notification.click_action} passHref>
+              <ButtonBase>
+                <Avatar
+                  src={notification.notifiable.thumbnail_url}
+                  style={styles.secondaryAvatar}
+                  loading="lazy"
+                />
+              </ButtonBase>
+            </Link>
+          </ListItemSecondaryAction>
+        )}
+      </Item>
+    </Link>
   ));
 };
 

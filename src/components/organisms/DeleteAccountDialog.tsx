@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useContext } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
-import { useHistory } from '@yusuke-suzuki/rize-router';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -22,6 +21,7 @@ import getFirebaseAuth from '../../utils/getFirebaseAuth';
 import { UsersApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import AuthContext from '../../context/AuthContext';
 import { createStyles, makeStyles } from '@material-ui/core';
+import { useRouter } from 'next/router';
 
 const useStyles = makeStyles(() =>
   createStyles({
@@ -43,7 +43,7 @@ const DeleteAccountDialog = () => {
   );
   const { dialogOpen } = useMappedState(mapState);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const router = useRouter();
 
   const [check, setCheck] = useState(false);
   const [disabled, setDisabled] = useState(true);
@@ -74,11 +74,11 @@ const DeleteAccountDialog = () => {
 
         dispatch(closeDeleteAccountDialog());
         dispatch(requestFinish());
-        history.push('/login');
+        router.push('/login');
         dispatch(openToast('Delete account successfully'));
       }
     );
-  }, [dispatch, history, currentUser]);
+  }, [dispatch, router, currentUser]);
 
   const classes = useStyles();
 

@@ -1,7 +1,7 @@
 import React, { useCallback, useContext } from 'react';
-import { useDispatch, useMappedState } from 'redux-react-hook';
+import { useDispatch } from 'redux-react-hook';
 
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import MapIcon from '@material-ui/icons/Map';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
@@ -19,36 +19,41 @@ import openCreateMapDialog from '../../actions/openCreateMapDialog';
 import openPlaceSelectDialog from '../../actions/openPlaceSelectDialog';
 import openSignInRequiredDialog from '../../actions/openSignInRequiredDialog';
 import AuthContext from '../../context/AuthContext';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  container: {
-    textAlign: 'center',
-    color: '#9e9e9e',
-    padding: 20
-  },
-  icon: {
-    width: 150,
-    height: 150
-  },
-  buttonIcon: {
-    marginRight: 8
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    container: {
+      textAlign: 'center',
+      color: '#9e9e9e',
+      padding: 20
+    },
+    icon: {
+      width: 150,
+      height: 150
+    },
+    buttonIcon: {
+      marginRight: 8
+    }
+  })
+);
 
 const ContentsIcon = props => {
+  const classes = useStyles();
+
   switch (props.contentType) {
     case 'map':
-      return <MapIcon style={styles.icon} />;
+      return <MapIcon className={classes.icon} />;
     case 'review':
-      return <RateReviewIcon style={styles.icon} />;
+      return <RateReviewIcon className={classes.icon} />;
     case 'notification':
-      return <NotificationsIcon style={styles.icon} />;
+      return <NotificationsIcon className={classes.icon} />;
     case 'like':
-      return <ThumbUpIcon style={styles.icon} />;
+      return <ThumbUpIcon className={classes.icon} />;
     case 'spot':
-      return <PlaceIcon style={styles.icon} />;
+      return <PlaceIcon className={classes.icon} />;
     case 'invite':
-      return <MailIcon style={styles.icon} />;
+      return <MailIcon className={classes.icon} />;
     default:
       return null;
   }
@@ -57,6 +62,7 @@ const ContentsIcon = props => {
 const PrimaryAction = props => {
   const { currentUser } = useContext(AuthContext);
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   const handleCreateMapButtonClick = useCallback(() => {
     if (currentUser.isAnonymous) {
@@ -82,7 +88,7 @@ const PrimaryAction = props => {
           color="primary"
           onClick={handleCreateMapButtonClick}
         >
-          <AddIcon style={styles.buttonIcon} />
+          <AddIcon className={classes.buttonIcon} />
           {I18n.t('create new map')}
         </Button>
       );
@@ -93,16 +99,18 @@ const PrimaryAction = props => {
           color="primary"
           onClick={handleCreateReviewButtonClick}
         >
-          <EditIcon style={styles.buttonIcon} />
+          <EditIcon className={classes.buttonIcon} />
           {I18n.t('create new report')}
         </Button>
       );
     case 'discover-reviews':
       return (
-        <Button color="primary" component={Link} to="/discover">
-          <SearchIcon style={styles.buttonIcon} />
-          {I18n.t('discover reviews')}
-        </Button>
+        <Link href="/discover" passHref>
+          <Button color="primary">
+            <SearchIcon className={classes.buttonIcon} />
+            {I18n.t('discover reviews')}
+          </Button>
+        </Link>
       );
     default:
       return null;
@@ -110,20 +118,26 @@ const PrimaryAction = props => {
 };
 
 const SecondaryAction = props => {
+  const classes = useStyles();
+
   switch (props.secondaryAction) {
     case 'discover-maps':
       return (
-        <Button color="primary" component={Link} to="/discover">
-          <SearchIcon style={styles.buttonIcon} />
-          {I18n.t('discover maps')}
-        </Button>
+        <Link href="/discover" passHref>
+          <Button color="primary">
+            <SearchIcon className={classes.buttonIcon} />
+            {I18n.t('discover maps')}
+          </Button>
+        </Link>
       );
     case 'discover-reviews':
       return (
-        <Button color="primary" component={Link} to="/discover">
-          <SearchIcon style={styles.buttonIcon} />
-          {I18n.t('discover reviews')}
-        </Button>
+        <Link href="/discover" passHref>
+          <Button color="primary">
+            <SearchIcon className={classes.buttonIcon} />
+            {I18n.t('discover reviews')}
+          </Button>
+        </Link>
       );
     default:
       return null;
@@ -131,8 +145,10 @@ const SecondaryAction = props => {
 };
 
 const NoContents = props => {
+  const classes = useStyles();
+
   return (
-    <div style={styles.container}>
+    <div className={classes.container}>
       <ContentsIcon {...props} />
       <Typography variant="subtitle1" color="inherit">
         {props.message}

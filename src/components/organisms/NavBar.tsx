@@ -10,10 +10,6 @@ import AppBar from '@material-ui/core/AppBar';
 import { match } from 'path-to-regexp';
 import DrawerContext from '../../context/DrawerContext';
 
-const isModalLocation = location => {
-  return location && location.state && location.state.modal;
-};
-
 const routesShowBackButton = [
   {
     path: '/maps/:mapId'
@@ -43,10 +39,7 @@ const NavBar = () => {
   const { currentLocation } = useMappedState(mapState);
 
   useEffect(() => {
-    if (isModalLocation(currentLocation)) {
-      return;
-    }
-    if (match('/maps/:mapId')(currentLocation.pathname)) {
+    if (match('/maps/:mapId')(currentLocation)) {
       setShowMapToolbar(true);
     } else {
       setShowMapToolbar(false);
@@ -54,12 +47,8 @@ const NavBar = () => {
   }, [currentLocation]);
 
   const showBackButton = useMemo(() => {
-    if (isModalLocation(currentLocation)) {
-      return false;
-    }
-
     return routesShowBackButton.find(route => {
-      return match(route.path)(currentLocation.pathname);
+      return match(route.path)(currentLocation);
     });
   }, [currentLocation, routesShowBackButton]);
 

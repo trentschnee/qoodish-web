@@ -1,4 +1,4 @@
-const downloadImage = url => {
+export default function downloadImage(url: string): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.responseType = 'blob';
@@ -10,5 +10,3 @@ const downloadImage = url => {
     xhr.send();
   });
 };
-
-export default downloadImage;

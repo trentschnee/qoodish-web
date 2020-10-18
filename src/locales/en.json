@@ -1,4 +1,6 @@
 {
+  "meta headline": "Qoodish - Map-based SNS",
+  "meta description": "Qoodish allows you to create maps with friends and share your favorite places.",
   "authentication error": "An authentication error has occurred",
   "internal server error": "An internal server error has occurred",
   "create map together": "Let's create adventure maps together.",

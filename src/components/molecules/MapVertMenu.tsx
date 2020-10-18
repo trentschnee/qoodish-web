@@ -14,16 +14,21 @@ import I18n from '../../utils/I18n';
 
 import openEditMapDialog from '../../actions/openEditMapDialog';
 import openDeleteMapDialog from '../../actions/openDeleteMapDialog';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  mapMenuIcon: {
-    color: 'white'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    mapMenuIcon: {
+      color: 'white'
+    }
+  })
+);
 
 const MapVertMenu = () => {
   const [anchorEl, setAnchorEl] = useState(undefined);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const classes = useStyles();
 
   const mapState = useCallback(
     state => ({
@@ -56,7 +61,7 @@ const MapVertMenu = () => {
           setMenuOpen(true);
         }}
       >
-        <MoreVertIcon style={styles.mapMenuIcon} />
+        <MoreVertIcon className={classes.mapMenuIcon} />
       </IconButton>
 
       <Menu

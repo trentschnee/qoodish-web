@@ -1,6 +1,4 @@
 import {
-  SELECT_REVIEW,
-  CLEAR_REVIEW_STATE,
   EDIT_REVIEW,
   DELETE_REVIEW,
   OPEN_EDIT_REVIEW_DIALOG,
@@ -31,14 +29,6 @@ const initialState = {
 
 const reducer = (state = initialState, action) => {
   switch (action.type) {
-    case SELECT_REVIEW:
-      return Object.assign({}, state, {
-        currentReview: action.payload.review
-      });
-    case CLEAR_REVIEW_STATE:
-      return Object.assign({}, state, {
-        currentReview: undefined
-      });
     case SELECT_PLACE_FOR_REVIEW:
       return Object.assign({}, state, {
         selectedPlace: action.payload.place,
@@ -106,7 +96,8 @@ const reducer = (state = initialState, action) => {
       });
     case OPEN_REVIEW_DIALOG:
       return Object.assign({}, state, {
-        reviewDialogOpen: true
+        reviewDialogOpen: true,
+        currentReview: action.payload.review
       });
     case CLOSE_REVIEW_DIALOG:
       return Object.assign({}, state, {
@@ -114,7 +105,6 @@ const reducer = (state = initialState, action) => {
       });
     case LOCATION_CHANGE:
       return Object.assign({}, state, {
-        reviewDialogOpen: false,
         editReviewDialogOpen: false,
         copyReviewDialogOpen: false,
         deleteReviewDialogOpen: false,

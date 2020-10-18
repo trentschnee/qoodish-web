@@ -17,35 +17,38 @@ import MapVertMenu from './MapVertMenu';
 import MapLikeActions from './MapLikeActions';
 import openInviteTargetDialog from '../../actions/openInviteTargetDialog';
 import BackButton from './BackButton';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  toolbarLarge: {
-    paddingLeft: 12,
-    paddingRight: 12
-  },
-  toolbarSmall: {
-    height: 56,
-    paddingLeft: 8,
-    paddingRight: 8
-  },
-  toolbarActions: {
-    marginLeft: 'auto',
-    display: 'flex'
-  },
-  mapMenuIcon: {
-    color: 'white'
-  },
-  mapName: {
-    cursor: 'pointer'
-  },
-  mapTypeIcon: {
-    marginRight: 6
-  },
-  backButtonLarge: {
-    marginRight: 12
-  },
-  backButtonSmall: {}
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    toolbarLarge: {
+      paddingLeft: 12,
+      paddingRight: 12
+    },
+    toolbarSmall: {
+      height: 56,
+      paddingLeft: 8,
+      paddingRight: 8
+    },
+    toolbarActions: {
+      marginLeft: 'auto',
+      display: 'flex'
+    },
+    mapMenuIcon: {
+      color: 'white'
+    },
+    mapName: {
+      cursor: 'pointer'
+    },
+    mapTypeIcon: {
+      marginRight: 6
+    },
+    backButtonLarge: {
+      marginRight: 12
+    },
+    backButtonSmall: {}
+  })
+);
 
 const isInvitable = map => {
   return map && (map.editable || (map.following && map.invitable));
@@ -55,6 +58,7 @@ const MapToolbar = () => {
   const dispatch = useDispatch();
   const lgUp = useMediaQuery('(min-width: 1280px)');
   const smUp = useMediaQuery('(min-width: 600px)');
+  const classes = useStyles();
 
   const mapState = useCallback(
     state => ({
@@ -69,15 +73,15 @@ const MapToolbar = () => {
   }, [dispatch]);
 
   return (
-    <Toolbar style={lgUp ? styles.toolbarLarge : styles.toolbarSmall}>
-      <div style={lgUp ? styles.backButtonLarge : styles.backButtonSmall}>
+    <Toolbar className={lgUp ? classes.toolbarLarge : classes.toolbarSmall}>
+      <div className={lgUp ? classes.backButtonLarge : classes.backButtonSmall}>
         <BackButton />
       </div>
       {map && map.private && (
         <Tooltip title={I18n.t('this map is private')}>
           <LockIcon
             color="inherit"
-            style={styles.mapTypeIcon}
+            className={classes.mapTypeIcon}
             fontSize="small"
           />
         </Tooltip>
@@ -87,12 +91,12 @@ const MapToolbar = () => {
           variant={smUp ? 'h6' : 'subtitle1'}
           color="inherit"
           noWrap
-          style={styles.mapName}
+          className={classes.mapName}
         >
           {map.name}
         </Typography>
       )}
-      <div style={styles.toolbarActions}>
+      <div className={classes.toolbarActions}>
         {isInvitable(map) && (
           <Tooltip title={I18n.t('button invite')}>
             <IconButton color="inherit" onClick={handleInviteButtonClick}>

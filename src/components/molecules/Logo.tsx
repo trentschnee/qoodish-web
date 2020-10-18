@@ -1,8 +1,6 @@
-import React from 'react';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-
-import Typography from '@material-ui/core/Typography';
-import { Link } from '@yusuke-suzuki/rize-router';
+import React, { memo } from 'react';
+import Link from 'next/link';
+import { Typography, useTheme, useMediaQuery } from '@material-ui/core';
 
 const styles = {
   logo: {
@@ -15,9 +13,21 @@ const styles = {
   }
 };
 
-const Logo = props => {
+type Props = {
+  color:
+    | 'inherit'
+    | 'initial'
+    | 'primary'
+    | 'secondary'
+    | 'textPrimary'
+    | 'textSecondary'
+    | 'error';
+};
+
+export default memo(function Logo(props: Props) {
   const { color } = props;
-  const smUp = useMediaQuery('(min-width: 600px)');
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Typography
@@ -25,11 +35,11 @@ const Logo = props => {
       color={color ? color : 'primary'}
       style={styles.logo}
     >
-      <Link to="/" style={styles.link} title="Qoodish">
-        Qoodish
+      <Link href="/">
+        <a title="Qoodish" style={styles.link}>
+          Qoodish
+        </a>
       </Link>
     </Typography>
   );
-};
-
-export default React.memo(Logo);
+});

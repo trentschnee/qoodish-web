@@ -1,6 +1,4 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { Link } from '@yusuke-suzuki/rize-router';
 
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
@@ -19,7 +17,8 @@ import I18n from '../../utils/I18n';
 import { ApiClient, SpotsApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import SkeletonTrendingList from '../molecules/SkeletonTrendingList';
 import AuthContext from '../../context/AuthContext';
-import { useTheme } from '@material-ui/core';
+import { useTheme, useMediaQuery } from '@material-ui/core';
+import SpotLink from '../molecules/SpotLink';
 
 const styles = {
   listItemLarge: {
@@ -96,52 +95,40 @@ const TrendingSpots = () => {
           }
         >
           {spots.map((spot, i) => (
-            <ListItem
-              button
-              key={spot.place_id}
-              component={Link}
-              to={{
-                pathname: `/spots/${spot.place_id}`,
-                state: { modal: true, spot: spot }
-              }}
-              title={spot.name}
-              style={smUp ? styles.listItemLarge : styles.listItemSmall}
-            >
-              <ListItemAvatar>
-                <Avatar
-                  src={spot.thumbnail_url}
-                  alt={spot.name}
-                  loading="lazy"
+            <SpotLink spot={spot} key={spot.place_id}>
+              <ListItem
+                button
+                style={smUp ? styles.listItemLarge : styles.listItemSmall}
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    src={spot.thumbnail_url}
+                    alt={spot.name}
+                    loading="lazy"
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  disableTypography={true}
+                  primary={
+                    <Typography variant="subtitle1" noWrap>
+                      {i + 1}. {spot.name}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography component="p" noWrap color="textSecondary">
+                      {spot.formatted_address}
+                    </Typography>
+                  }
                 />
-              </ListItemAvatar>
-              <ListItemText
-                disableTypography={true}
-                primary={
-                  <Typography variant="subtitle1" noWrap>
-                    {i + 1}. {spot.name}
-                  </Typography>
-                }
-                secondary={
-                  <Typography component="p" noWrap color="textSecondary">
-                    {spot.formatted_address}
-                  </Typography>
-                }
-              />
-              <ListItemSecondaryAction style={styles.listItemSecondaryAction}>
-                <Button
-                  size="small"
-                  component={Link}
-                  to={{
-                    pathname: `/spots/${spot.place_id}`,
-                    state: { modal: true, spot: spot }
-                  }}
-                  title={spot.name}
-                  variant="outlined"
-                >
-                  {I18n.t('detail')}
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
+                <ListItemSecondaryAction style={styles.listItemSecondaryAction}>
+                  <SpotLink spot={spot} key={spot.placeId}>
+                    <Button size="small" variant="outlined">
+                      {I18n.t('detail')}
+                    </Button>
+                  </SpotLink>
+                </ListItemSecondaryAction>
+              </ListItem>
+            </SpotLink>
           ))}
         </List>
       </CardContent>

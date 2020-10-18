@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
-import { useHistory } from '@yusuke-suzuki/rize-router';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -19,6 +18,7 @@ import requestStart from '../../actions/requestStart';
 import requestFinish from '../../actions/requestFinish';
 
 import { MapsApi } from '@yusuke-suzuki/qoodish-api-js-client';
+import { useRouter } from 'next/router';
 
 const DeleteMapDialog = () => {
   const mapState = useCallback(
@@ -30,7 +30,7 @@ const DeleteMapDialog = () => {
   );
   const { currentMap, dialogOpen } = useMappedState(mapState);
   const dispatch = useDispatch();
-  const history = useHistory();
+  const router = useRouter();
 
   const [check, setCheck] = useState(false);
   const [disabled, setDisabled] = useState(true);
@@ -56,13 +56,13 @@ const DeleteMapDialog = () => {
       if (response.ok) {
         dispatch(closeDeleteMapDialog());
         dispatch(deleteMap(currentMap.id));
-        history.push('');
+        router.push('');
         dispatch(openToast(I18n.t('delete map success')));
       } else {
         dispatch(openToast('Failed to delete map.'));
       }
     });
-  }, [dispatch, history, currentMap]);
+  }, [dispatch, router, currentMap]);
 
   return (
     <Dialog open={dialogOpen} onClose={handleRequestDialogClose} fullWidth>

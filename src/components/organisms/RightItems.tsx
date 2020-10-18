@@ -1,20 +1,11 @@
 import React from 'react';
 import { CardContent, Typography, Divider, Paper } from '@material-ui/core';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import I18n from '../../utils/I18n';
-
-const RecommendMaps = React.lazy(() =>
-  import(/* webpackChunkName: "recommend_maps" */ './RecommendMaps')
-);
-const TrendingMaps = React.lazy(() =>
-  import(/* webpackChunkName: "trending_maps" */ './TrendingMaps')
-);
-const TrendingSpots = React.lazy(() =>
-  import(/* webpackChunkName: "trending_spots" */ './TrendingSpots')
-);
-const FbPage = React.lazy(() =>
-  import(/* webpackChunkName: "fb_page" */ '../molecules/FbPage')
-);
+import RecommendMaps from './RecommendMaps';
+import TrendingMaps from './TrendingMaps';
+import TrendingSpots from './TrendingSpots';
+import FbPage from '../molecules/FbPage';
 
 const styles = {
   item: {
@@ -33,10 +24,14 @@ const Footer = React.memo(() => {
     <Paper elevation={0}>
       <CardContent style={styles.cardContent}>
         <div>
-          <Link to="/terms">{I18n.t('terms of service')}</Link>
+          <Link href="/terms">
+            <a>{I18n.t('terms of service')}</a>
+          </Link>
         </div>
         <div>
-          <Link to="/privacy">{I18n.t('privacy policy')}</Link>
+          <Link href="/privacy">
+            <a>{I18n.t('privacy policy')}</a>
+          </Link>
         </div>
         <Typography variant="caption">
           © 2019 Qoodish, All rights reserved.

@@ -97,9 +97,11 @@ const SpotCard = props => {
       <CardMedia style={smUp ? styles.cardMediaLarge : styles.cardMediaSmall}>
         <a href={currentSpot.url} target="_blank">
           <img
-            src={`${process.env.GOOGLE_STATIC_MAP_URL}&zoom=${17}&size=${
-              smUp ? 700 : 400
-            }x${smUp ? 250 : 200}&scale=${2}&center=${currentSpot.lat},${
+            src={`${
+              process.env.NEXT_PUBLIC_GOOGLE_STATIC_MAP_URL
+            }&zoom=${17}&size=${smUp ? 700 : 400}x${
+              smUp ? 250 : 200
+            }&scale=${2}&center=${currentSpot.lat},${
               currentSpot.lng
             }&markers=size:mid%7Ccolor:red%7C${currentSpot.lat},${
               currentSpot.lng

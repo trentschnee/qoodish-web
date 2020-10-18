@@ -1,7 +1,5 @@
 import React, { useCallback } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -16,10 +14,11 @@ import Slide from '@material-ui/core/Slide';
 import Fade from '@material-ui/core/Fade';
 
 import I18n from '../../utils/I18n';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import FollowMapButton from '../molecules/FollowMapButton';
 import closeFollowingMapsDialog from '../../actions/closeFollowingMapsDialog';
 import DialogAppBar from '../molecules/DialogAppBar';
+import { useMediaQuery, useTheme } from '@material-ui/core';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -38,7 +37,8 @@ const styles = {
 };
 
 const FollowingMapsDialog = () => {
-  const large = useMediaQuery('(min-width: 600px)');
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
   const mapState = useCallback(
     state => ({
       open: state.profile.followingMapsDialogOpen,
@@ -58,10 +58,10 @@ const FollowingMapsDialog = () => {
       open={open}
       onClose={onClose}
       fullWidth
-      fullScreen={!large}
-      TransitionComponent={large ? Fade : Transition}
+      fullScreen={!smUp}
+      TransitionComponent={smUp ? Fade : Transition}
     >
-      {large ? (
+      {smUp ? (
         <DialogTitle>{I18n.t('following')}</DialogTitle>
       ) : (
         <DialogAppBar
@@ -73,29 +73,28 @@ const FollowingMapsDialog = () => {
       <DialogContent style={styles.dialogContent}>
         <List>
           {maps.map(map => (
-            <ListItem
-              button
-              component={Link}
-              to={`/maps/${map.id}`}
-              key={map.id}
-              onClick={onClose}
-              style={styles.listItem}
-            >
-              <ListItemAvatar>
-                <Avatar alt={map.name} src={map.thumbnail_url} loading="lazy" />
-              </ListItemAvatar>
-              <ListItemText
-                disableTypography={true}
-                primary={
-                  <Typography variant="subtitle1" noWrap>
-                    {map.name}
-                  </Typography>
-                }
-              />
-              <ListItemSecondaryAction>
-                <FollowMapButton currentMap={map} />
-              </ListItemSecondaryAction>
-            </ListItem>
+            <Link key={map.id} href={`/maps/${map.id}`} passHref>
+              <ListItem button onClick={onClose} style={styles.listItem}>
+                <ListItemAvatar>
+                  <Avatar
+                    alt={map.name}
+                    src={map.thumbnail_url}
+                    loading="lazy"
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  disableTypography={true}
+                  primary={
+                    <Typography variant="subtitle1" noWrap>
+                      {map.name}
+                    </Typography>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <FollowMapButton currentMap={map} />
+                </ListItemSecondaryAction>
+              </ListItem>
+            </Link>
           ))}
         </List>
       </DialogContent>

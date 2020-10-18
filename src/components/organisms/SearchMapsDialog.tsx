@@ -13,7 +13,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import Paper from '@material-ui/core/Paper';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import Typography from '@material-ui/core/Typography';
 
 import searchMaps from '../../actions/searchMaps';
@@ -120,25 +120,21 @@ const SearchMapsDialog = () => {
       <Paper style={styles.paper}>
         <List disablePadding={pickedMaps.length < 1}>
           {pickedMaps.map(map => (
-            <ListItem
-              button
-              component={Link}
-              to={`/maps/${map.id}`}
-              key={map.id}
-              onClick={handleRequestClose}
-            >
-              <ListItemAvatar>
-                <Avatar alt={map.name} src={map.thumbnail_url} />
-              </ListItemAvatar>
-              <ListItemText
-                disableTypography={true}
-                primary={
-                  <Typography variant="subtitle1" noWrap>
-                    {map.name}
-                  </Typography>
-                }
-              />
-            </ListItem>
+            <Link key={map.id} href={`/maps/${map.id}`} passHref>
+              <ListItem button onClick={handleRequestClose}>
+                <ListItemAvatar>
+                  <Avatar alt={map.name} src={map.thumbnail_url} />
+                </ListItemAvatar>
+                <ListItemText
+                  disableTypography={true}
+                  primary={
+                    <Typography variant="subtitle1" noWrap>
+                      {map.name}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Paper>

@@ -45,7 +45,7 @@ const UserAvatar = React.memo(() => {
 
   const { currentUser } = useContext(AuthContext);
 
-  if (currentUser.isAnonymous) {
+  if (!currentUser || currentUser.isAnonymous) {
     return (
       <Avatar style={styles.avatar}>
         <PersonIcon />
@@ -62,7 +62,11 @@ const UserAvatar = React.memo(() => {
   }
 });
 
-const ReviewCardActions = React.memo(props => {
+type ReviewCardChildrenProps = {
+  review: any;
+};
+
+const ReviewCardActions = React.memo((props: ReviewCardChildrenProps) => {
   const { review } = props;
   const { currentUser } = useContext(AuthContext);
   const [commentFormActive, setCommentFormActive] = useState(false);

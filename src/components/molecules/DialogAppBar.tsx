@@ -1,53 +1,53 @@
-import React from 'react';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import CloseIcon from '@material-ui/icons/Close';
+import { memo, ReactNode } from 'react';
+import {
+  AppBar,
+  createStyles,
+  IconButton,
+  makeStyles,
+  Toolbar,
+  Typography
+} from '@material-ui/core';
+import { ArrowBack, Close } from '@material-ui/icons';
 
-const styles = {
-  appbar: {
-    position: 'relative'
-  },
-  toolbar: {
-    height: 56,
-    paddingLeft: 8,
-    paddingRight: 8
-  },
-  actionButton: {
-    marginLeft: 'auto'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    appbar: {
+      position: 'relative'
+    },
+    toolbar: {
+      height: 56,
+      paddingLeft: 8,
+      paddingRight: 8
+    },
+    actionButton: {
+      marginLeft: 'auto'
+    }
+  })
+);
 
 type Props = {
-  color?: string;
+  color?: 'default' | 'inherit' | 'transparent' | 'primary' | 'secondary';
   iconType?: string;
-  handleRequestDialogClose: Function;
-  action?: Element;
+  handleRequestDialogClose: any;
+  action?: ReactNode;
   title: string;
 };
 
-const DialogAppBar: React.FC<Props> = props => {
+export default memo(function DialogAppBar(props: Props) {
   const { color, iconType, handleRequestDialogClose, action, title } = props;
+  const classes = useStyles();
 
   return (
-    <AppBar
-      style={styles.appbar}
-      color={color ? color : 'primary'}
-      elevation={2}
-    >
-      <Toolbar style={styles.toolbar}>
+    <AppBar position="relative" color={color ? color : 'primary'} elevation={2}>
+      <Toolbar className={classes.toolbar}>
         <IconButton color="inherit" onClick={handleRequestDialogClose}>
-          {iconType === 'back' ? <ArrowBackIcon /> : <CloseIcon />}
+          {iconType === 'back' ? <ArrowBack /> : <Close />}
         </IconButton>
         <Typography variant="h6" color="inherit" noWrap>
           {title}
         </Typography>
-        {action && <div style={styles.actionButton}>{action}</div>}
+        {action && <div className={classes.actionButton}>{action}</div>}
       </Toolbar>
     </AppBar>
   );
-};
-
-export default React.memo(DialogAppBar);
+});

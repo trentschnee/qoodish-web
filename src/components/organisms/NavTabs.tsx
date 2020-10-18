@@ -10,7 +10,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 
 import Badge from '@material-ui/core/Badge';
 
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import I18n from '../../utils/I18n';
 
 import NotificationsMenu from './NotificationsMenu';
@@ -39,7 +39,7 @@ const NavTabs = () => {
 
   const isSelected = useCallback(
     pathname => {
-      return currentLocation && currentLocation.pathname === pathname;
+      return currentLocation === pathname;
     },
     [currentLocation]
   );
@@ -57,7 +57,7 @@ const NavTabs = () => {
     if (!currentLocation) {
       return;
     }
-    switch (currentLocation.pathname) {
+    switch (currentLocation) {
       case '/':
         setSelectedValue(0);
         break;
@@ -79,30 +79,30 @@ const NavTabs = () => {
         indicatorColor="secondary"
         textColor="inherit"
       >
-        <Tab
-          icon={<HomeIcon />}
-          selected={true}
-          style={styles.tab}
-          component={Link}
-          to="/"
-          title={I18n.t('home')}
-        />
-        <Tab
-          icon={<ExploreIcon />}
-          selected={isSelected('/discover')}
-          style={styles.tab}
-          component={Link}
-          to="/discover"
-          title={I18n.t('discover')}
-        />
-        <Tab
-          icon={<AccountCircleIcon />}
-          selected={isSelected('/profile')}
-          style={styles.tab}
-          component={Link}
-          to="/profile"
-          title={I18n.t('account')}
-        />
+        <Link href="/" passHref>
+          <Tab
+            icon={<HomeIcon />}
+            selected={true}
+            style={styles.tab}
+            title={I18n.t('home')}
+          />
+        </Link>
+        <Link href="/discover" passHref>
+          <Tab
+            icon={<ExploreIcon />}
+            selected={isSelected('/discover')}
+            style={styles.tab}
+            title={I18n.t('discover')}
+          />
+        </Link>
+        <Link href="/profile" passHref>
+          <Tab
+            icon={<AccountCircleIcon />}
+            selected={isSelected('/profile')}
+            style={styles.tab}
+            title={I18n.t('account')}
+          />
+        </Link>
         <Tab
           icon={
             unreadNotifications.length > 0 ? (

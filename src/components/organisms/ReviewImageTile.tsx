@@ -1,45 +1,31 @@
-import React from 'react';
-
-import { Link } from '@yusuke-suzuki/rize-router';
-import { ButtonBase } from '@material-ui/core';
+import React, { memo } from 'react';
+import ReviewLink from '../molecules/ReviewLink';
 
 const styles = {
-  reviewTile: {
-    cursor: 'pointer',
-    width: '100%',
-    height: '100%'
-  },
   reviewImage: {
     width: '100%'
   }
 };
 
-const ReviewImageTile = props => {
+type Props = {
+  review: any;
+};
+
+export default memo(function ReviewImageTile(props: Props) {
   const { review } = props;
 
   return (
-    <ButtonBase
-      key={review.id}
-      style={styles.reviewTile}
-      component={Link}
-      to={{
-        pathname: `/maps/${review.map.id}/reports/${review.id}`,
-        state: { modal: true, review: review }
-      }}
-      title={review.spot.name}
-    >
+    <ReviewLink review={review}>
       <img
         src={
           review.images.length > 0
             ? review.images[0].thumbnail_url_400
-            : process.env.NO_IMAGE
+            : process.env.NEXT_PUBLIC_NO_IMAGE
         }
         alt={review.spot.name}
         loading="lazy"
         style={styles.reviewImage}
       />
-    </ButtonBase>
+    </ReviewLink>
   );
-};
-
-export default React.memo(ReviewImageTile);
+});

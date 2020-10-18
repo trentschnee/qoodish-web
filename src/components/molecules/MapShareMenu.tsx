@@ -20,24 +20,27 @@ import {
   TwitterShareButton,
   TwitterIcon
 } from 'react-share';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  mapMenuIcon: {
-    color: 'white'
-  },
-  shareButton: {
-    display: 'flex',
-    outline: 'none',
-    alignItems: 'center',
-    width: '100%'
-  },
-  listItemText: {
-    flex: 'none'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    mapMenuIcon: {
+      color: 'white'
+    },
+    shareButton: {
+      display: 'flex',
+      outline: 'none',
+      alignItems: 'center',
+      width: '100%'
+    },
+    listItemText: {
+      flex: 'none'
+    }
+  })
+);
 
 const shareUrl = map => {
-  return map ? `${process.env.ENDPOINT}/maps/${map.id}` : '';
+  return map ? `${process.env.NEXT_PUBLIC_ENDPOINT}/maps/${map.id}` : '';
 };
 
 const MapShareMenu = () => {
@@ -52,6 +55,8 @@ const MapShareMenu = () => {
     dispatch(openToast(I18n.t('copied')));
   }, [dispatch]);
 
+  const classes = useStyles();
+
   return (
     <div>
       <Tooltip title={I18n.t('button share')}>
@@ -64,7 +69,7 @@ const MapShareMenu = () => {
             setMenuOpen(true);
           }}
         >
-          <ShareIcon style={styles.mapMenuIcon} />
+          <ShareIcon className={classes.mapMenuIcon} />
         </IconButton>
       </Tooltip>
 
@@ -77,30 +82,39 @@ const MapShareMenu = () => {
         <MenuItem
           key="facebook"
           onClick={() => setMenuOpen(false)}
-          style={styles.shareButton}
+          className={classes.shareButton}
         >
-          <FacebookShareButton url={shareUrl(map)} style={styles.shareButton}>
+          <FacebookShareButton
+            url={shareUrl(map)}
+            className={classes.shareButton}
+          >
             <ListItemIcon>
               <FacebookIcon round size={24} />
             </ListItemIcon>
-            <ListItemText primary={I18n.t('share with facebook')} style={styles.listItemText} />
+            <ListItemText
+              primary={I18n.t('share with facebook')}
+              className={classes.listItemText}
+            />
           </FacebookShareButton>
         </MenuItem>
 
         <MenuItem
           key="twitter"
           onClick={() => setMenuOpen(false)}
-          style={styles.shareButton}
+          className={classes.shareButton}
         >
           <TwitterShareButton
             url={shareUrl(map)}
             title={map && map.name}
-            style={styles.shareButton}
+            className={classes.shareButton}
           >
             <ListItemIcon>
               <TwitterIcon round size={24} />
             </ListItemIcon>
-            <ListItemText primary={I18n.t('share with twitter')} style={styles.listItemText} />
+            <ListItemText
+              primary={I18n.t('share with twitter')}
+              className={classes.listItemText}
+            />
           </TwitterShareButton>
         </MenuItem>
 

@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react';
+import { Avatar } from '@material-ui/core';
+import AvatarGroup from '@material-ui/lab/AvatarGroup';
+import { memo, useCallback } from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import openFollowersDialog from '../../actions/openFollowersDialog';
-import Avatar from '@material-ui/core/Avatar';
-import AvatarGroup from '@material-ui/lab/AvatarGroup';
 
-const FollowerAvatars = () => {
+export default memo(function FollowerAvatars() {
   const dispatch = useDispatch();
 
   const followers = useMappedState(
@@ -26,6 +26,4 @@ const FollowerAvatars = () => {
       ))}
     </AvatarGroup>
   );
-};
-
-export default React.memo(FollowerAvatars);
+});

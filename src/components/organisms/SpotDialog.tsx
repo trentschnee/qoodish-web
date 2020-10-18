@@ -1,7 +1,4 @@
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { useHistory } from '@yusuke-suzuki/rize-router';
-import { match } from 'path-to-regexp';
+import React, { useCallback } from 'react';
 
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
@@ -12,9 +9,8 @@ import SpotCard from './SpotCard';
 import I18n from '../../utils/I18n';
 import DialogAppBar from '../molecules/DialogAppBar';
 import closeSpotDialog from '../../actions/closeSpotDialog';
-import openSpotDialog from '../../actions/openSpotDialog';
 import { useDispatch, useMappedState } from 'redux-react-hook';
-import { useTheme } from '@material-ui/core';
+import { useMediaQuery, useTheme } from '@material-ui/core';
 
 const styles = {
   dialogContent: {
@@ -33,56 +29,37 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 const SpotDialog = () => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [currentSpot, setCurrentSpot] = useState(undefined);
-
-  const dispatch = useDispatch();
-  const history = useHistory();
-  const theme = useTheme();
-  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
-
   const mapState = useCallback(
     state => ({
-      currentLocation: state.shared.currentLocation
+      currentSpot: state.spotDetail.currentSpot,
+      spotDialogOpen: state.spotDetail.spotDialogOpen
     }),
     []
   );
 
-  const { currentLocation } = useMappedState(mapState);
+  const { currentSpot, spotDialogOpen } = useMappedState(mapState);
 
-  const isMatched = useMemo(() => {
-    const matched = match('/spots/:placeId')(currentLocation.pathname);
-    return matched && currentLocation.state && currentLocation.state.modal;
-  }, [currentLocation]);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (isMatched) {
-      setCurrentSpot(currentLocation.state.spot);
-      setDialogOpen(true);
-    } else {
-      setDialogOpen(false);
-    }
-  }, [isMatched, currentLocation]);
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
 
   const handleDialogOpen = useCallback(() => {
-    dispatch(openSpotDialog());
-
     if (currentSpot) {
-      gtag('config', process.env.GA_TRACKING_ID, {
+      (window as any).gtag('config', process.env.NEXT_PUBLIC_GA_TRACKING_ID, {
         page_path: `/spots/${currentSpot.place_id}`,
         page_title: `${currentSpot.name} | Qoodish`
       });
     }
-  }, [dispatch, currentSpot]);
+  }, [currentSpot]);
 
   const handleDialogClose = useCallback(() => {
     dispatch(closeSpotDialog());
-    history.goBack();
-  }, [dispatch, history]);
+  }, [dispatch]);
 
   return (
     <Dialog
-      open={dialogOpen}
+      open={spotDialogOpen}
       onEntered={handleDialogOpen}
       onClose={handleDialogClose}
       TransitionComponent={smUp ? Fade : Transition}

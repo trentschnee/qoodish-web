@@ -1,4 +1,10 @@
-import React, { useState, useCallback, useEffect, useContext } from 'react';
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useContext,
+  forwardRef
+} from 'react';
 import { useDispatch, useMappedState } from 'redux-react-hook';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 
@@ -9,7 +15,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
-import Slide from '@material-ui/core/Slide';
+import Slide, { SlideProps } from '@material-ui/core/Slide';
 import Fade from '@material-ui/core/Fade';
 import PhotoCameraIcon from '@material-ui/icons/PhotoCamera';
 import IconButton from '@material-ui/core/IconButton';
@@ -26,41 +32,48 @@ import sleep from '../../utils/sleep';
 import { UsersApi, NewUser } from '@yusuke-suzuki/qoodish-api-js-client';
 import DialogAppBar from '../molecules/DialogAppBar';
 import AuthContext from '../../context/AuthContext';
+import { v1 as uuidv1 } from 'uuid';
+import { createStyles, makeStyles, Theme } from '@material-ui/core';
+import { useTheme } from '@material-ui/styles';
 
-const styles = {
-  dialogContentSmall: {
-    paddingTop: 24
-  },
-  avatarContainer: {
-    marginBottom: 20,
-    position: 'relative'
-  },
-  profileAvatar: {
-    width: 80,
-    height: 80
-  },
-  imageInput: {
-    display: 'none'
-  },
-  image: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover'
-  },
-  editImageButton: {
-    position: 'absolute',
-    top: 16,
-    left: 16
-  }
-};
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    dialogContentSmall: {
+      paddingTop: 24
+    },
+    avatarContainer: {
+      marginBottom: 20,
+      position: 'relative'
+    },
+    profileAvatar: {
+      width: 80,
+      height: 80
+    },
+    imageInput: {
+      display: 'none'
+    },
+    image: {
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      objectFit: 'cover'
+    },
+    editImageButton: {
+      position: 'absolute',
+      top: 16,
+      left: 16
+    }
+  })
+);
 
-const Transition = React.forwardRef(function Transition(props, ref) {
+const Transition = forwardRef(function Transition(props: SlideProps, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
 const EditProfileDialog = () => {
-  const large = useMediaQuery('(min-width: 600px)');
+  const classes = useStyles();
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
   const dispatch = useDispatch();
 
   const mapState = useCallback(
@@ -160,24 +173,17 @@ const EditProfileDialog = () => {
       display_name: name,
       biography: bio
     };
+
     if (editImage) {
+      const fileName = `profile/${uuidv1()}.jpg`;
+      const res = await uploadToStorage(imageUrl, fileName, 'data_url');
+
       Object.assign(params, {
-        image_url: imageUrl
+        image_url: res
       });
     }
 
     dispatch(requestStart());
-
-    if (params.image_url) {
-      const uploadResponse = await uploadToStorage(
-        params.image_url,
-        'profile',
-        'data_url'
-      );
-      Object.assign(params, {
-        image_url: uploadResponse.imageUrl
-      });
-    }
 
     const apiInstance = new UsersApi();
     const newUser = NewUser.constructFromObject(params);
@@ -211,10 +217,10 @@ const EditProfileDialog = () => {
       disableBackdropClick
       disableEscapeKeyDown
       fullWidth
-      fullScreen={!large}
-      TransitionComponent={large ? Fade : Transition}
+      fullScreen={!smUp}
+      TransitionComponent={smUp ? Fade : Transition}
     >
-      {large ? (
+      {smUp ? (
         <DialogTitle>{I18n.t('edit profile')}</DialogTitle>
       ) : (
         <DialogAppBar
@@ -233,14 +239,14 @@ const EditProfileDialog = () => {
           }
         />
       )}
-      <DialogContent style={large ? {} : styles.dialogContentSmall}>
-        <div style={styles.avatarContainer}>
-          <Avatar src={imageUrl} style={styles.profileAvatar}>
-            <img src={imageUrl} style={styles.image} />
+      <DialogContent className={smUp ? {} : classes.dialogContentSmall}>
+        <div className={classes.avatarContainer}>
+          <Avatar src={imageUrl} className={classes.profileAvatar}>
+            <img src={imageUrl} className={classes.image} />
           </Avatar>
           <IconButton
             onClick={handleAddImageClick}
-            style={styles.editImageButton}
+            className={classes.editImageButton}
           >
             <PhotoCameraIcon />
           </IconButton>
@@ -250,7 +256,7 @@ const EditProfileDialog = () => {
           accept="image/*"
           id="profile-image-input"
           onChange={handleImageChange}
-          style={styles.imageInput}
+          className={classes.imageInput}
         />
         <TextField
           label={I18n.t('name')}
@@ -270,13 +276,13 @@ const EditProfileDialog = () => {
           helperText={errorBio}
           fullWidth
           multiline
-          rowsMax={large ? '3' : '2'}
-          rows={large ? '3' : '3'}
+          rowsMax={smUp ? '3' : '2'}
+          rows={smUp ? '3' : '3'}
           value={bio ? bio : ''}
           margin="normal"
         />
       </DialogContent>
-      {large && (
+      {smUp && (
         <DialogActions>
           <Button onClick={handleRequestDialogClose}>{I18n.t('cancel')}</Button>
           <Button

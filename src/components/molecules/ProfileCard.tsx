@@ -7,32 +7,38 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 
 import ProfileAvatar from './ProfileAvatar';
 import I18n from '../../utils/I18n';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import AuthContext from '../../context/AuthContext';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  cardContent: {
-    paddingBottom: 0
-  },
-  name: {
-    marginTop: 8
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    cardContent: {
+      paddingBottom: 0
+    },
+    name: {
+      marginTop: 8
+    }
+  })
+);
 
 const ProfileCard = () => {
   const profile = useMappedState(useCallback(state => state.app.profile, []));
 
   const { currentUser } = useContext(AuthContext);
+  const classes = useStyles();
 
   return (
-    <ButtonBase component={Link} to="/profile">
-      <CardContent style={styles.cardContent}>
-        <ProfileAvatar size={48} profile={profile} />
-        <Typography variant="h6" gutterBottom style={styles.name} inline>
-          {currentUser.isAnonymous ? I18n.t('anonymous user') : profile.name}
-        </Typography>
-      </CardContent>
-    </ButtonBase>
+    <Link href="/profile" passHref>
+      <ButtonBase>
+        <CardContent className={classes.cardContent}>
+          <ProfileAvatar size={48} profile={profile} />
+          <Typography variant="h6" gutterBottom className={classes.name}>
+            {currentUser.isAnonymous ? I18n.t('anonymous user') : profile.name}
+          </Typography>
+        </CardContent>
+      </ButtonBase>
+    </Link>
   );
 };
 

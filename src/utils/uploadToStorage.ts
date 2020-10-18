@@ -1,13 +1,18 @@
-import { v1 as uuidv1 } from 'uuid';
 import getFirebase from './getFirebase';
 import getFirebaseStorage from './getFirebaseStorage';
 
-const uploadToStorage = (image, dir = 'images', fileType = 'blob') => {
+export default function uploadToStorage(
+  data: string | Blob | Uint8Array | ArrayBuffer,
+  fileName: string,
+  fileType: 'blob' | 'data_url'
+): Promise<string> {
   return new Promise(async (resolve, reject) => {
     await getFirebaseStorage();
     const firebase = await getFirebase();
 
-    const storage = firebase.app().storage(process.env.FIREBASE_IMAGE_BUCKET);
+    const storage = firebase
+      .app()
+      .storage(process.env.NEXT_PUBLIC_FIREBASE_IMAGE_BUCKET);
     const storageRef = storage.ref();
 
     const metadata = {
@@ -15,19 +20,17 @@ const uploadToStorage = (image, dir = 'images', fileType = 'blob') => {
       cacheControl: `public,max-age=${30 * 24 * 60 * 60}` // 30 Days
     };
 
-    const fileName = `${dir}/${uuidv1()}.jpg`;
-
     let uploadTask;
     if (fileType === 'blob') {
-      uploadTask = storageRef.child(fileName).put(image, metadata);
+      uploadTask = storageRef.child(fileName).put(data as Blob, metadata);
     } else if (fileType === 'data_url') {
       uploadTask = storageRef
         .child(fileName)
-        .putString(image, 'data_url', metadata);
+        .putString(data as string, 'data_url', metadata);
     } else {
       uploadTask = storageRef
         .child(fileName)
-        .putString(image, fileType, metadata);
+        .putString(data as string, fileType, metadata);
     }
 
     uploadTask.on(
@@ -55,14 +58,9 @@ const uploadToStorage = (image, dir = 'images', fileType = 'blob') => {
         reject();
       },
       () => {
-        const imageUrl = `${process.env.CLOUD_STORAGE_ENDPOINT}/${process.env.CLOUD_STORAGE_BUCKET_NAME}/${fileName}`;
-        resolve({
-          imageUrl: imageUrl,
-          fileName: uploadTask.snapshot.ref.name
-        });
+        const imageUrl = `${process.env.NEXT_PUBLIC_CLOUD_STORAGE_ENDPOINT}/${process.env.NEXT_PUBLIC_CLOUD_STORAGE_BUCKET_NAME}/${fileName}`;
+        resolve(imageUrl);
       }
     );
   });
-};
-
-export default uploadToStorage;
+}

@@ -1,13 +1,13 @@
-import React, { useCallback } from 'react';
+import { memo, useCallback } from 'react';
 import switchMap from '../../actions/switchMap';
-import { useHistory } from '@yusuke-suzuki/rize-router';
 import IconButton from '@material-ui/core/IconButton';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import { useMappedState, useDispatch } from 'redux-react-hook';
 import { useTheme, useMediaQuery } from '@material-ui/core';
+import { useRouter } from 'next/router';
 
-const BackButton = () => {
-  const history = useHistory();
+export default memo(function BackButton() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const theme = useTheme();
   const lgUp = useMediaQuery(theme.breakpoints.up('lg'));
@@ -28,17 +28,15 @@ const BackButton = () => {
     }
 
     if (historyCount > 2) {
-      history.goBack();
+      router.back();
     } else {
-      history.push('/');
+      router.push('/');
     }
-  }, [dispatch, history, mapSummaryOpen, historyCount, lgUp]);
+  }, [dispatch, router, mapSummaryOpen, historyCount, lgUp]);
 
   return (
     <IconButton color="inherit" onClick={handleBackButtonClick}>
       <ArrowBackIcon />
     </IconButton>
   );
-};
-
-export default React.memo(BackButton);
+});

@@ -7,7 +7,7 @@ import Chip from '@material-ui/core/Chip';
 import Avatar from '@material-ui/core/Avatar';
 import PlaceIcon from '@material-ui/icons/Place';
 import I18n from '../../utils/I18n';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import moment from 'moment';
 import PublicIcon from '@material-ui/icons/Public';
@@ -141,24 +141,22 @@ const MapSummaryCard = () => {
       <Typography variant="subtitle2" gutterBottom color="textSecondary">
         {I18n.t('owner')}
       </Typography>
-      <ButtonBase
-        component={Link}
-        to={currentMap ? `/users/${currentMap.owner_id}` : '/'}
-        title={currentMap && currentMap.owner_name}
-      >
-        <Chip
-          avatar={
-            <Avatar
-              src={currentMap && currentMap.owner_image_url}
-              alt={currentMap && currentMap.owner_name}
-              loading="lazy"
-            />
-          }
-          label={currentMap && currentMap.owner_name}
-          style={styles.chip}
-          clickable
-        />
-      </ButtonBase>
+      <Link href={currentMap ? `/users/${currentMap.owner_id}` : '/'} passHref>
+        <ButtonBase title={currentMap && currentMap.owner_name}>
+          <Chip
+            avatar={
+              <Avatar
+                src={currentMap && currentMap.owner_image_url}
+                alt={currentMap && currentMap.owner_name}
+                loading="lazy"
+              />
+            }
+            label={currentMap && currentMap.owner_name}
+            style={styles.chip}
+            clickable
+          />
+        </ButtonBase>
+      </Link>
 
       <Typography variant="subtitle2" gutterBottom color="textSecondary">
         {I18n.t('description')}

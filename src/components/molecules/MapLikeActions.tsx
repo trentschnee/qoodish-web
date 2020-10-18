@@ -8,16 +8,20 @@ import openSignInRequiredDialog from '../../actions/openSignInRequiredDialog';
 import I18n from '../../utils/I18n';
 import { LikesApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import AuthContext from '../../context/AuthContext';
+import { createStyles, makeStyles } from '@material-ui/core';
 
-const styles = {
-  likeButton: {
-    color: 'white'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    likeButton: {
+      color: 'white'
+    }
+  })
+);
 
 const MapLikeActions = props => {
   const { target } = props;
   const dispatch = useDispatch();
+  const classes = useStyles();
 
   const { currentUser } = useContext(AuthContext);
 
@@ -33,7 +37,7 @@ const MapLikeActions = props => {
         dispatch(editMap(response.body));
         dispatch(openToast(I18n.t('liked!')));
 
-        gtag('event', 'like', {
+        (window as any).gtag('event', 'like', {
           event_category: 'engagement',
           event_label: 'map'
         });
@@ -50,7 +54,7 @@ const MapLikeActions = props => {
         dispatch(editMap(response.body));
         dispatch(openToast(I18n.t('unliked')));
 
-        gtag('event', 'unlike', {
+        (window as any).gtag('event', 'unlike', {
           event_category: 'engagement',
           event_label: 'map'
         });
@@ -65,7 +69,7 @@ const MapLikeActions = props => {
       handleLikeButtonClick={handleLikeButtonClick}
       handleUnlikeButtonClick={handleUnlikeButtonClick}
       target={target}
-      style={styles.likeButton}
+      className={classes.likeButton}
     />
   );
 };

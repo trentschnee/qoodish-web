@@ -2,7 +2,7 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { useMappedState, useDispatch } from 'redux-react-hook';
 import MapCollection from './MapCollection';
 import fetchMyMaps from '../../actions/fetchMyMaps';
-import { UserMapsApi } from '@yusuke-suzuki/qoodish-api-js-client';
+import { ApiClient, UserMapsApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import SkeletonMapCollection from './SkeletonMapCollection';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
 import NoContents from '../molecules/NoContents';
@@ -30,17 +30,16 @@ const ProfileMyMaps = props => {
   const { params } = props;
 
   const initMaps = useCallback(async () => {
-    if (
-      location &&
-      location.pathname === '/profile' &&
-      currentUser.isAnonymous
-    ) {
+    if (location === '/profile' && currentUser.isAnonymous) {
       setLoading(false);
       return;
     }
 
     const userId = params && params.userId ? params.userId : currentUser.uid;
 
+    const firebaseAuth = ApiClient.instance.authentications['firebaseAuth'];
+    firebaseAuth.apiKey = await currentUser.getIdToken();
+    firebaseAuth.apiKeyPrefix = 'Bearer';
     const apiInstance = new UserMapsApi();
 
     apiInstance.usersUserIdMapsGet(userId, {}, (error, data, response) => {

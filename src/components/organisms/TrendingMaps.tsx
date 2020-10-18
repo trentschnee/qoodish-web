@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 
 import Typography from '@material-ui/core/Typography';
 import Avatar from '@material-ui/core/Avatar';
@@ -106,42 +106,41 @@ const TrendingMaps = () => {
           }
         >
           {maps.map((map, i) => (
-            <ListItem
-              button
-              key={map.id}
-              component={Link}
-              to={`/maps/${map.id}`}
-              title={map.name}
-              style={smUp ? styles.listItemLarge : styles.listItemSmall}
-            >
-              <ListItemAvatar>
-                <Avatar src={map.thumbnail_url} alt={map.name} loading="lazy" />
-              </ListItemAvatar>
-              <ListItemText
-                disableTypography={true}
-                primary={
-                  <Typography variant="subtitle1" noWrap>
-                    {i + 1}. {map.name}
-                  </Typography>
-                }
-                secondary={
-                  <Typography component="p" noWrap color="textSecondary">
-                    {map.description}
-                  </Typography>
-                }
-              />
-              <ListItemSecondaryAction style={styles.listItemSecondaryAction}>
-                <Button
-                  size="small"
-                  component={Link}
-                  to={`/maps/${map.id}`}
-                  title={map.name}
-                  variant="outlined"
-                >
-                  {I18n.t('detail')}
-                </Button>
-              </ListItemSecondaryAction>
-            </ListItem>
+            <Link key={map.id} href={`/maps/${map.id}`} passHref>
+              <ListItem
+                button
+                title={map.name}
+                style={smUp ? styles.listItemLarge : styles.listItemSmall}
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    src={map.thumbnail_url}
+                    alt={map.name}
+                    loading="lazy"
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  disableTypography={true}
+                  primary={
+                    <Typography variant="subtitle1" noWrap>
+                      {i + 1}. {map.name}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography component="p" noWrap color="textSecondary">
+                      {map.description}
+                    </Typography>
+                  }
+                />
+                <ListItemSecondaryAction style={styles.listItemSecondaryAction}>
+                  <Link href={`/maps/${map.id}`} passHref>
+                    <Button size="small" title={map.name} variant="outlined">
+                      {I18n.t('detail')}
+                    </Button>
+                  </Link>
+                </ListItemSecondaryAction>
+              </ListItem>
+            </Link>
           ))}
         </List>
       </CardContent>

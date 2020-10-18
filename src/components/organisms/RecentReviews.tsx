@@ -1,7 +1,6 @@
 import React, { useCallback, useState, useEffect, useContext } from 'react';
 import { useMappedState, useDispatch } from 'redux-react-hook';
 import useMediaQuery from '@material-ui/core/useMediaQuery';
-import { Link } from '@yusuke-suzuki/rize-router';
 
 import CardMedia from '@material-ui/core/CardMedia';
 import GridList from '@material-ui/core/GridList';
@@ -21,16 +20,13 @@ import { ApiClient, ReviewsApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import Skeleton from '@material-ui/lab/Skeleton';
 import AuthContext from '../../context/AuthContext';
 import { useTheme } from '@material-ui/core';
+import ReviewLink from '../molecules/ReviewLink';
 
 const styles = {
   gridList: {
     flexWrap: 'nowrap',
     transform: 'translateZ(0)',
     width: '100%'
-  },
-  gridTile: {
-    cursor: 'pointer',
-    textDecoration: 'none'
   },
   reviewCard: {
     margin: 3
@@ -158,70 +154,64 @@ const RecentReviews = () => {
               </GridListTile>
             ))
           : recentReviews.map(review => (
-              <GridListTile
-                key={review.id}
-                style={styles.gridTile}
-                component={Link}
-                to={{
-                  pathname: `/maps/${review.map.id}/reports/${review.id}`,
-                  state: { modal: true, review: review }
-                }}
-              >
-                <Card style={styles.reviewCard} elevation={0}>
-                  <CardHeader
-                    avatar={
-                      <Avatar
-                        src={review.author.profile_image_url}
-                        alt={review.author.name}
+              <GridListTile key={review.id}>
+                <ReviewLink review={review}>
+                  <Card style={styles.reviewCard} elevation={0}>
+                    <CardHeader
+                      avatar={
+                        <Avatar
+                          src={review.author.profile_image_url}
+                          alt={review.author.name}
+                          loading="lazy"
+                        />
+                      }
+                      title={
+                        <Typography
+                          variant="subtitle2"
+                          color="textPrimary"
+                          noWrap
+                          style={styles.author}
+                        >
+                          {review.author.name}
+                        </Typography>
+                      }
+                      subheader={moment(
+                        review.created_at,
+                        'YYYY-MM-DDThh:mm:ss.SSSZ'
+                      )
+                        .locale(I18n.locale)
+                        .fromNow()}
+                    />
+                    <CardMedia style={styles.cardMedia}>
+                      <img
+                        src={
+                          review.images.length > 0
+                            ? review.images[0].thumbnail_url_400
+                            : process.env.NEXT_PUBLIC_SUBSTITUTE_URL
+                        }
+                        alt={review.spot.name}
+                        style={styles.reviewImage}
                         loading="lazy"
                       />
-                    }
-                    title={
+                    </CardMedia>
+                    <CardContent style={styles.cardContent}>
                       <Typography
-                        variant="subtitle2"
-                        color="textPrimary"
+                        variant="subtitle1"
+                        color="primary"
+                        gutterBottom
                         noWrap
-                        style={styles.author}
                       >
-                        {review.author.name}
+                        {review.map.name}
                       </Typography>
-                    }
-                    subheader={moment(
-                      review.created_at,
-                      'YYYY-MM-DDThh:mm:ss.SSSZ'
-                    )
-                      .locale(I18n.locale)
-                      .fromNow()}
-                  />
-                  <CardMedia style={styles.cardMedia}>
-                    <img
-                      src={
-                        review.images.length > 0
-                          ? review.images[0].thumbnail_url_400
-                          : process.env.SUBSTITUTE_URL
-                      }
-                      alt={review.spot.name}
-                      style={styles.reviewImage}
-                      loading="lazy"
-                    />
-                  </CardMedia>
-                  <CardContent style={styles.cardContent}>
-                    <Typography
-                      variant="subtitle1"
-                      color="primary"
-                      gutterBottom
-                      noWrap
-                    >
-                      {review.map.name}
-                    </Typography>
-                    <Typography variant="h6" gutterBottom noWrap>
-                      {review.spot.name}
-                    </Typography>
-                    <Typography component="p" style={styles.reviewComment}>
-                      {review.comment}
-                    </Typography>
-                  </CardContent>
-                </Card>
+                      <Typography variant="h6" gutterBottom noWrap>
+                        {review.spot.name}
+                      </Typography>
+                      <Typography component="p" style={styles.reviewComment}>
+                        {review.comment}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </ReviewLink>
               </GridListTile>
             ))}
       </GridList>

@@ -1,7 +1,13 @@
-import React, { useEffect, useCallback, useState, useContext } from 'react';
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useContext,
+  Fragment
+} from 'react';
 import { useMappedState } from 'redux-react-hook';
 
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 
 import moment from 'moment';
 import List from '@material-ui/core/List';
@@ -18,7 +24,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import NoContents from '../molecules/NoContents';
 
 import I18n from '../../utils/I18n';
-import { LikesApi } from '@yusuke-suzuki/qoodish-api-js-client';
+import { ApiClient, LikesApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import AuthContext from '../../context/AuthContext';
 
 const styles = {
@@ -40,25 +46,25 @@ const PrimaryText = props => {
   switch (props.like.votable.type) {
     case 'review':
       return (
-        <React.Fragment>
+        <Fragment>
           <b>{props.like.voter.name}</b>
           {` ${I18n.t('liked report of').replace(
             'owner',
             props.like.votable.owner.name
           )}`}
           <b>{props.like.votable.name}</b>
-        </React.Fragment>
+        </Fragment>
       );
     case 'map':
       return (
-        <React.Fragment>
+        <Fragment>
           <b>{props.like.voter.name}</b>
           {` ${I18n.t('liked map of').replace(
             'owner',
             props.like.votable.owner.name
           )}`}
           <b>{props.like.votable.name}</b>
-        </React.Fragment>
+        </Fragment>
       );
     default:
       return '';
@@ -88,11 +94,7 @@ const LikesList = props => {
   const { currentUser } = useContext(AuthContext);
 
   const initUserLikes = useCallback(async () => {
-    if (
-      location &&
-      location.pathname === '/profile' &&
-      currentUser.isAnonymous
-    ) {
+    if (location === '/profile' && currentUser.isAnonymous) {
       setLoading(false);
       return;
     }
@@ -100,6 +102,9 @@ const LikesList = props => {
 
     const userId = params && params.userId ? params.userId : currentUser.uid;
 
+    const firebaseAuth = ApiClient.instance.authentications['firebaseAuth'];
+    firebaseAuth.apiKey = await currentUser.getIdToken();
+    firebaseAuth.apiKeyPrefix = 'Bearer';
     const apiInstance = new LikesApi();
 
     apiInstance.usersUserIdLikesGet(userId, (error, data, response) => {
@@ -108,7 +113,7 @@ const LikesList = props => {
         setLikes(response.body);
       }
     });
-  }, [currentUser, location]);
+  }, [params, currentUser, location]);
 
   useEffect(() => {
     initUserLikes();
@@ -125,46 +130,45 @@ const LikesList = props => {
       <Paper elevation={0}>
         <List>
           {likes.map(like => (
-            <ListItem
-              key={like.id}
-              button
-              component={Link}
-              to={like.click_action}
-            >
-              <ListItemAvatar>
-                <Avatar
-                  src={like.voter.profile_image_url}
-                  alt={like.voter.name}
-                  loading="lazy"
+            <Link key={like.id} href={like.click_action} passHref>
+              <ListItem button>
+                <ListItemAvatar>
+                  <Avatar
+                    src={like.voter.profile_image_url}
+                    alt={like.voter.name}
+                    loading="lazy"
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  style={styles.listItemText}
+                  primary={
+                    <Typography variant="subtitle1">
+                      <PrimaryText like={like} />
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="subtitle1" color="textSecondary">
+                      {fromNow(like)}
+                    </Typography>
+                  }
+                  disableTypography
                 />
-              </ListItemAvatar>
-              <ListItemText
-                style={styles.listItemText}
-                primary={
-                  <Typography variant="subtitle1">
-                    <PrimaryText like={like} />
-                  </Typography>
-                }
-                secondary={
-                  <Typography variant="subtitle1" color="textSecondary">
-                    {fromNow(like)}
-                  </Typography>
-                }
-                disableTypography
-              />
-              {like.votable.thumbnail_url && (
-                <ListItemSecondaryAction>
-                  <ButtonBase component={Link} to={like.click_action}>
-                    <Avatar
-                      src={like.votable.thumbnail_url}
-                      variant="rounded"
-                      style={styles.secondaryAvatar}
-                      loading="lazy"
-                    />
-                  </ButtonBase>
-                </ListItemSecondaryAction>
-              )}
-            </ListItem>
+                {like.votable.thumbnail_url && (
+                  <ListItemSecondaryAction>
+                    <Link key={like.id} href={like.click_action} passHref>
+                      <ButtonBase>
+                        <Avatar
+                          src={like.votable.thumbnail_url}
+                          variant="rounded"
+                          style={styles.secondaryAvatar}
+                          loading="lazy"
+                        />
+                      </ButtonBase>
+                    </Link>
+                  </ListItemSecondaryAction>
+                )}
+              </ListItem>
+            </Link>
           ))}
         </List>
       </Paper>

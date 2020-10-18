@@ -53,7 +53,6 @@ const initialState = {
   feedbackDialogOpen: false,
   drawerOpen: false,
   currentLocation: undefined,
-  previousLocation: undefined,
   historyCount: 0,
   pickedMaps: [],
   searchMapsDialogOpen: false,
@@ -62,10 +61,6 @@ const initialState = {
   announcementIsNew: false,
   imageDialogOpen: false,
   currentImageUrl: undefined
-};
-
-const isModalLocation = location => {
-  return location.state && location.state.modal;
 };
 
 const reducer = (state = initialState, action) => {
@@ -227,18 +222,9 @@ const reducer = (state = initialState, action) => {
         createActionsOpen: false
       });
     case LOCATION_CHANGE:
-      let nextLocation = action.payload.location;
-
-      let historyCount =
-        isModalLocation(nextLocation) ||
-        (state.currentLocation && isModalLocation(state.currentLocation))
-          ? state.historyCount
-          : state.historyCount + 1;
-
       return Object.assign({}, state, {
-        currentLocation: nextLocation,
-        previousLocation: state.currentLocation,
-        historyCount: historyCount,
+        currentLocation: action.payload.location,
+        historyCount: state.historyCount + 1,
         issueDialogOpen: false,
         likesDialogOpen: false,
         followersDialogOpen: false,

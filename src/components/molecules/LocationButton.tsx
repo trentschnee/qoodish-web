@@ -1,37 +1,43 @@
-import React, { useCallback } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useDispatch } from 'redux-react-hook';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
-
-import Tooltip from '@material-ui/core/Tooltip';
-import Fab from '@material-ui/core/Fab';
-import MyLocationIcon from '@material-ui/icons/MyLocation';
-
 import fetchCurrentPosition from '../../utils/fetchCurrentPosition';
 import getCurrentPosition from '../../actions/getCurrentPosition';
 import requestCurrentPosition from '../../actions/requestCurrentPosition';
-
 import I18n from '../../utils/I18n';
+import {
+  createStyles,
+  Fab,
+  makeStyles,
+  Tooltip,
+  useMediaQuery,
+  useTheme
+} from '@material-ui/core';
+import { MyLocation } from '@material-ui/icons';
 
-const styles = {
-  buttonLarge: {
-    zIndex: 1100,
-    position: 'absolute',
-    bottom: 108,
-    right: 32,
-    backgroundColor: 'white'
-  },
-  buttonSmall: {
-    zIndex: 1100,
-    position: 'absolute',
-    bottom: 90,
-    right: 20,
-    backgroundColor: 'white'
-  }
-};
+const useStyles = makeStyles(() =>
+  createStyles({
+    buttonLarge: {
+      zIndex: 1100,
+      position: 'absolute',
+      bottom: 108,
+      right: 32,
+      backgroundColor: 'white'
+    },
+    buttonSmall: {
+      zIndex: 1100,
+      position: 'absolute',
+      bottom: 90,
+      right: 20,
+      backgroundColor: 'white'
+    }
+  })
+);
 
-const LocationButton = () => {
+export default memo(function LocationButton() {
   const dispatch = useDispatch();
-  const large = useMediaQuery('(min-width: 600px)');
+  const theme = useTheme();
+  const smUp = useMediaQuery(theme.breakpoints.up('sm'));
+  const classes = useStyles();
 
   const handleButtonClick = useCallback(async () => {
     const position = await fetchCurrentPosition();
@@ -41,18 +47,16 @@ const LocationButton = () => {
     );
 
     dispatch(requestCurrentPosition());
-  }, [dispatch]);
+  }, [dispatch, fetchCurrentPosition]);
 
   return (
     <Tooltip title={I18n.t('button current location')}>
       <Fab
-        style={large ? styles.buttonLarge : styles.buttonSmall}
+        className={smUp ? classes.buttonLarge : classes.buttonSmall}
         onClick={handleButtonClick}
       >
-        <MyLocationIcon />
+        <MyLocation />
       </Fab>
     </Tooltip>
   );
-};
-
-export default React.memo(LocationButton);
+});

@@ -152,7 +152,9 @@ const ProfileCard = React.memo(props => {
     <Card elevation={0}>
       <CardMedia style={styles.cardMedia}>
         <img
-          src={`${process.env.GOOGLE_STATIC_MAP_URL}&zoom=${17}&size=${
+          src={`${
+            process.env.NEXT_PUBLIC_GOOGLE_STATIC_MAP_URL
+          }&zoom=${17}&size=${
             smUp ? 900 : 400
           }x${200}&scale=${2}&center=${35.710063},${139.8107}`}
           style={styles.staticMapImage}
@@ -170,7 +172,7 @@ const ProfileCard = React.memo(props => {
           <ProfileAvatar size={smUp ? 100 : 80} profile={profile} />
         </div>
         <div style={styles.profileActions}>
-          {location && location.pathname === '/profile' ? (
+          {location === '/profile' ? (
             <EditProfileButton />
           ) : (
             <div style={styles.dummyButton} />

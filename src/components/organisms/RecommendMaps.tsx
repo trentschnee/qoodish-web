@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 import { ApiClient, MapsApi } from '@yusuke-suzuki/qoodish-api-js-client';
 import I18n from '../../utils/I18n';
 
-import { Link } from '@yusuke-suzuki/rize-router';
+import Link from 'next/link';
 import MapCard from '../molecules/MapCard';
 import SkeletonMapCard from '../molecules/SkeletonMapCard';
 import AuthContext from '../../context/AuthContext';
@@ -52,31 +52,25 @@ const RecommendMaps = () => {
 
   return (
     <div>
-      <div>
-        <div style={styles.titleContainer}>
-          <Typography variant="subtitle1" color="textSecondary">
-            {I18n.t('recommend')}
-          </Typography>
-          <Button
-            component={Link}
-            to="/discover"
-            size="small"
-            color="primary"
-            style={styles.discoverButton}
-          >
+      <div style={styles.titleContainer}>
+        <Typography variant="subtitle1" color="textSecondary">
+          {I18n.t('recommend')}
+        </Typography>
+        <Link href="/discover" passHref>
+          <Button size="small" color="primary" style={styles.discoverButton}>
             {I18n.t('discover more')}
           </Button>
-        </div>
-        {maps.length < 1 ? (
-          <Loading />
-        ) : (
-          maps.map(map => (
-            <div key={map.id} style={styles.mapCard}>
-              <MapCard map={map} />
-            </div>
-          ))
-        )}
+        </Link>
       </div>
+      {maps.length < 1 ? (
+        <Loading />
+      ) : (
+        maps.map(map => (
+          <div key={map.id} style={styles.mapCard}>
+            <MapCard map={map} />
+          </div>
+        ))
+      )}
     </div>
   );
 };
